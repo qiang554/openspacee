@@ -22,6 +22,7 @@ func NewConfigMap(kr *kube_resource.KubeResources) *ConfigMap {
 		views.NewView(http.MethodGet, "/:cluster", cm.list),
 		views.NewView(http.MethodPost, "/:cluster/delete", cm.delete),
 		views.NewView(http.MethodPost, "/:cluster/update/:namespace/:name", cm.updateYaml),
+		views.NewView(http.MethodPost, "/:cluster/update_obj/:namespace/:name", cm.updateObj),
 	}
 	cm.Views = vs
 	return cm
@@ -71,4 +72,16 @@ func (cm *ConfigMap) updateYaml(c *views.Context) *utils.Response {
 		"yaml":      ser.Yaml,
 	}
 	return cm.ConfigMap.UpdateYaml(c.Param("cluster"), reqParams)
+}
+
+func (cm *ConfigMap) updateObj(c *views.Context) *utils.Response {
+	var ser UpdateMapSerializer
+	if err := c.ShouldBind(&ser); err != nil {
+		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
+	}
+	reqParams := map[string]interface{}{
+		"data": ser.Data,
+	}
+
+	return cm.ConfigMap.UpdateObj(c.Param("cluster"), reqParams)
 }

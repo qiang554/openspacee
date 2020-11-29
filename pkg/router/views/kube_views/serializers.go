@@ -40,3 +40,7 @@ type EventListSerializers struct {
 	Name      string `json:"name" form:"name"`
 	Namespace string `json:"namespace" form:"namespace"`
 }
+
+type UpdateMapSerializer struct {
+	Data map[string]string
+}
