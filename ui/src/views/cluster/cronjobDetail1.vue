@@ -30,13 +30,13 @@
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
-            <el-form-item label="注解">
+            <!-- <el-form-item label="注解">
               <span v-if="!cronjob.annotations">—</span>
               
               <template v-else v-for="(val, key) in cronjob.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
 
       <div style="padding: 0px 8px;">
@@ -54,7 +54,7 @@
             >
             <el-table-column
               prop="name"
-              label="Job名称"
+              label="名称"
               min-width="45"
               show-overflow-tooltip>
               <template slot-scope="scope">
@@ -331,7 +331,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
+            <div v-else style="color: #909399; text-align: center">暂无事件发生</div>
           </div>
         </el-tab-pane>
       </el-tabs>

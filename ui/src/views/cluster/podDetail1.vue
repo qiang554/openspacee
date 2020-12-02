@@ -269,90 +269,67 @@
           </div>
         </el-tab-pane>
         <el-tab-pane label="事件" name="events">
-          <template v-if="podEvents && podEvents.length > 0">
-
-            <div class="msgClass">
-              <el-table
-                :data="podEvents"
-                class="table-fix"
-                tooltip-effect="dark"
-                style="width: 100%"
-                v-loading="eventLoading"
-                :cell-style="cellStyle"
-                :default-sort = "{prop: 'event_time', order: 'descending'}"
-                >
-                <el-table-column
-                  prop="type"
-                  label="类型"
-                  min-width="30"
-                  show-overflow-tooltip>
-                </el-table-column>
-                <el-table-column
-                  prop="object"
-                  label="对象"
-                  min-width="70"
-                  show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    <span>
-                      {{ scope.row.object.kind }}/{{ scope.row.object.name }}
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="reason"
-                  label="原因"
-                  min-width="30"
-                  show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    <span>
-                      {{ scope.row.reason ? scope.row.reason : "—" }}
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="message"
-                  label="信息"
-                  min-width="120"
-                  show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    <span>
-                      {{ scope.row.message ? scope.row.message : "—" }}
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="event_time"
-                  label="触发时间"
-                  min-width="50"
-                  show-overflow-tooltip>
-                </el-table-column>
-              </el-table>
-            </div>
-          </template>
-          <div v-else style="margin: 15px 5px;text-align: center; color: #909399;">暂无数据</div>
+          <div class="msgClass">
+            <el-table
+              v-if="podEvents && podEvents.length > 0"
+              :data="podEvents"
+              class="table-fix"
+              tooltip-effect="dark"
+              style="width: 100%"
+              v-loading="eventLoading"
+              :cell-style="cellStyle"
+              :default-sort = "{prop: 'event_time', order: 'descending'}"
+              >
+              <el-table-column
+                prop="type"
+                label="类型"
+                min-width="30"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="object"
+                label="对象"
+                min-width="70"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="reason"
+                label="原因"
+                min-width="30"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.reason ? scope.row.reason : "—" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="message"
+                label="信息"
+                min-width="120"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>
+                    {{ scope.row.message ? scope.row.message : "—" }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="event_time"
+                label="触发时间"
+                min-width="50"
+                show-overflow-tooltip>
+              </el-table-column>
+            </el-table>
+            <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无事件发生</div>
+          </div>
         </el-tab-pane>
       </el-tabs>
-        <!-- </el-collapse-item> -->
-      <!-- <el-collapse class="podCollapse" :value="['volumes', 'conditions', 'events']"> -->
-      <!-- <el-collapse class="podCollapse">
-        <el-collapse-item title="Volumes" name="volumes">
-          <template slot="title">
-            <span class="title-class">Volumes</span>
-          </template>
-          
-        </el-collapse-item>
-        <el-collapse-item title="Conditions" name="conditions">
-          <template slot="title">
-            <span class="title-class">Conditions</span>
-          </template>
-        </el-collapse-item>
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
-          
-        </el-collapse-item>
-      </el-collapse> -->
 
       <el-dialog title="终端" :visible.sync="terminal" :close-on-click-modal="false" width="80%" top="55px">
         <terminal v-if="terminal" :cluster="cluster" :namespace="namespace" :pod="podName" :container="selectContainer"></terminal>

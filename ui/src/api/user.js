@@ -61,3 +61,11 @@ export function updateUser(pk, data) {
     data
   })
 }
+
+export function deleteUser(users) {
+  return request({
+    url: `/user/delete`,
+    method: 'post',
+    data: users,
+  })
+}

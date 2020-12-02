@@ -56,7 +56,7 @@
             >
             <el-table-column
               prop="name"
-              label="POD名称"
+              label="名称"
               min-width="150"
               show-overflow-tooltip>
               <template slot-scope="scope">
@@ -418,7 +418,7 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            <div v-else style="padding: 25px 15px ;color: #909399; text-align: center">暂无数据</div>
+            <div v-else style="padding: 25px 15px ;color: #909399; text-align: center">暂无事件发生</div>
           </div>
         </el-tab-pane>
       </el-tabs>

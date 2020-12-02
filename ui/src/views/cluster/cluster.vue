@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="dashboard-container">
+    <div class="dashboard-container" v-loading="loading">
       <el-row :gutter="20" style="margin-bottom: 10px;" class="row-class">
         <el-col :span="24">
           <div class="border-class">
@@ -167,8 +167,7 @@
       <el-row>
         <div class="border-class event-class">
           <div style="margin: 5px 0px 10px;">事件</div>
-          <!-- <div style="margin: auto; text-align: center; color: #909399;">暂无事件</div> -->
-          <el-timeline>
+          <el-timeline v-if="events && events.length > 0">
             <template v-for="e of events">
               <el-timeline-item :key="e.uid" :timestamp="e.event_time" placement="top">
                 <el-card shadow="never">
@@ -177,25 +176,8 @@
                 </el-card>
               </el-timeline-item>
             </template>
-            <!-- <el-timeline-item timestamp="2020-10-19T15:00:19Z" placement="top">
-            <el-card shadow="never">
-                <p class="event-title">HorizontalPodAutoscaler/nginx-deployment</p>
-                <p class="event-body">missing request for cpu</p>
-            </el-card>
-            </el-timeline-item>
-            <el-timeline-item timestamp="2020-10-19T14:59:28Z" placement="top">
-            <el-card shadow="never">
-                <p class="event-title">PersistentVolumeClaim/test-pvc2</p>
-                <p class="event-body">waiting for first consumer to be created before binding</p>
-            </el-card>
-            </el-timeline-item>
-            <el-timeline-item timestamp="2020-10-19T14:59:28Z" placement="top">
-            <el-card shadow="never">
-                <p class="event-title">PersistentVolumeClaim/test-ttt</p>
-                <p class="event-body">no persistent volumes available for this claim and no storage class is set</p>
-            </el-card>
-            </el-timeline-item> -->
           </el-timeline>
+          <div v-else style=" padding: 10px 15px 25px; color: #909399; text-align: center">暂无事件发生</div>
         </div>
       </el-row>
     </div>
@@ -212,6 +194,7 @@ export default {
     return {
       cluster_detail: {},
       originEvents: [],
+      loading: true,
     }
   },
   components: {
@@ -223,9 +206,6 @@ export default {
     events: function() {
       let dlist = []
       for (let p of this.originEvents) {
-        // if (this.search_ns.length > 0 && this.search_ns.indexOf(p.namespace) < 0) continue
-        // if (this.search_name && !p.name.includes(this.search_name)) continue
-    
         dlist.push(p)
       }
       dlist.sort((a, b) => {
@@ -249,7 +229,7 @@ export default {
         })
         listEvents(cluster).then(response => {
           this.loading = false
-          this.originEvents = response.data
+          this.originEvents = response.data ? response.data : []
         }).catch(() => {
           this.loading = false
         })

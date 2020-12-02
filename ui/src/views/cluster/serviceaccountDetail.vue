@@ -30,81 +30,6 @@
           </template>
         </el-form-item> -->
       </el-form>
-      
-      <el-collapse class="podCollapse" :value="['secrets', 'events']">
-        <!-- <el-collapse-item title="Secrets" name="secrets">
-          <template slot="title">
-            <span class="title-class">Secrets</span>
-          </template>
-          <div class="msgClass">
-            <span>{{ serviceaccount.secrets }}</span>
-          </div>
-        </el-collapse-item> -->
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
-          <div class="msgClass">
-            <el-table
-              v-if="serviceaccountEvents && serviceaccountEvents.length > 0"
-              :data="serviceaccountEvents"
-              class="table-fix"
-              tooltip-effect="dark"
-              style="width: 100%"
-              v-loading="eventLoading"
-              :cell-style="cellStyle"
-              :default-sort = "{prop: 'event_time', order: 'descending'}"
-              >
-              <el-table-column
-                prop="type"
-                label="类型"
-                min-width="25"
-                show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column
-                prop="object"
-                label="对象"
-                min-width="55"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="reason"
-                label="原因"
-                min-width="50"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.reason ? scope.row.reason : "—" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="message"
-                label="信息"
-                min-width="120"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.message ? scope.row.message : "—" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="触发时间"
-                min-width="50"
-                show-overflow-tooltip>
-              </el-table-column>
-            </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
-          </div>
-        </el-collapse-item>
-      </el-collapse>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -120,8 +45,8 @@
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
 import { getServiceAccount, deleteServiceAccounts, updateServiceAccount } from '@/api/serviceaccount'
-import { listEndpoints } from '@/api/endpoints'
-import { listEvents, buildEvent } from '@/api/event'
+// import { listEndpoints } from '@/api/endpoints'
+// import { listEvents, buildEvent } from '@/api/event'
 // import { listPods, containerClass, buildPods, podMatch, deletePods } from '@/api/pods'
 import { Message } from 'element-ui'
 
@@ -140,11 +65,11 @@ export default {
       loading: true,
       originServiceAccount: undefined,
       // pods: [],
-      endpoints: [],
-      selectContainer: '',
-      selectPodName: '',
-      serviceaccountEvents: [],
-      eventLoading: true,
+      // endpoints: [],
+      // selectContainer: '',
+      // selectPodName: '',
+      // serviceaccountEvents: [],
+      // eventLoading: true,
     }
   },
   created() {
@@ -160,31 +85,6 @@ export default {
         let newRv = newObj.resource.metadata.resourceVersion
         if (this.serviceaccount.resource_version < newRv) {
           this.originServiceAccount = newObj.resource
-        }
-      }
-    },
-    eventWatch: function (newObj) {
-      if (newObj && this.originServiceAccount) {
-        let event = newObj.resource
-        if (event.involvedObject.namespace !== this.serviceaccount.namespace) return
-        if (event.involvedObject.uid !== this.serviceaccount.uid) return
-        let newUid = newObj.resource.metadata.uid
-        if (newObj.event === 'add') {
-          this.serviceaccountEvents.push(buildEvent(event))
-        } else if (newObj.event == 'update') {
-          let newRv = newObj.resource.metadata.resourceVersion
-          for (let i in this.serviceaccountEvents) {
-            let d = this.serviceaccountEvents[i]
-            if (d.uid === newUid) {
-              if (d.resource_version < newRv){
-                let newEvent = buildEvent(newObj.resource)
-                this.$set(this.serviceaccountEvents, i, newEvent)
-              }
-              break
-            }
-          }
-        } else if (newObj.event === 'delete') {
-          this.serviceaccountEvents = this.serviceaccountEvents.filter(( { uid } ) => uid !== newUid)
         }
       }
     },
@@ -209,56 +109,32 @@ export default {
     serviceaccountWatch: function() {
       return this.$store.getters["ws/serviceaccountsWatch"]
     },
-    eventWatch: function() {
-      return this.$store.getters["ws/eventWatch"]
-    },
   },
   methods: {
     fetchData: function() {
       this.originServiceAccount = null
-      this.serviceaccountEvents = []
       this.loading = true
-      this.eventLoading = true
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       if (!this.namespace) {
         Message.error("获取命名空间参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       if (!this.serviceaccountName) {
         Message.error("获取ServiceAccount名称参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       getServiceAccount(cluster, this.namespace, this.serviceaccountName).then(response => {
-        // this.loading = false
+        this.loading = false
         this.originServiceAccount = response.data
-        listEndpoints(cluster, this.namespace, this.serviceaccountName).then(response => {
-          this.loading = false
-          this.endpoints = response.data
-        }).catch(() => {
-          this.loading = false
-        })
-
-        listEvents(cluster, this.originServiceAccount.metadata.uid).then(response => {
-          this.eventLoading = false
-          if (response.data) {
-            this.serviceaccountEvents = response.data.length > 0 ? response.data : []
-          }
-        }).catch(() => {
-          this.eventLoading = false
-        })
       }).catch(() => {
         this.loading = false
-        this.eventLoading = false
       })
     },
     buildServiceAccount: function(serviceaccount) {

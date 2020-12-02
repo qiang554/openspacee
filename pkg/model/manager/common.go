@@ -60,7 +60,7 @@ func (cm *CommonManager) Save(key string, keyObj interface{}, expire time.Durati
 	} else {
 		pipeline := cm.client.Pipeline()
 		pipeline.HMSet(cm.Context, cm.PrimaryKey(key), m)
-		pipeline.Expire(cm.Context, key, expire)
+		pipeline.Expire(cm.Context, cm.PrimaryKey(key), expire)
 		_, err := pipeline.Exec(cm.Context)
 		if err != nil {
 			return err

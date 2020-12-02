@@ -7,9 +7,10 @@ export function podMatch(selector, labels) {
   return s(labels)
 }
 
-export function listPods(cluster, label_selector=null) {
+export function listPods(cluster, label_selector=null, names=null) {
   let data = {}
   if (label_selector) data['label_selector'] = label_selector
+  if (names) data['names'] = names
   return request({
     url: `pods/${cluster}/list`,
     method: 'post',

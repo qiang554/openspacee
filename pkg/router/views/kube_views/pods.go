@@ -36,6 +36,7 @@ func (p *Pod) list(c *views.Context) *utils.Response {
 		"name":           ser.Name,
 		"namespace":      ser.Namespace,
 		"label_selector": ser.LabelSelector,
+		"names":          ser.Names,
 	}
 	return p.Pod.List(c.Param("cluster"), reqParams)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
+	"k8s.io/klog"
 	"net/http"
 )
 
@@ -25,6 +26,7 @@ func NewUser(models *model.Models) *User {
 		NewView(http.MethodPut, "/:username", user.update),
 
 		NewView(http.MethodGet, "/token", user.tokenUser),
+		NewView(http.MethodPost, "/delete", user.delete),
 	}
 	user.Views = views
 	return user
@@ -145,4 +147,22 @@ func (u *User) create(c *Context) *utils.Response {
 		"status":   userObj.Status,
 	}
 	return resp
+}
+
+func (u *User) delete(c *Context) *utils.Response {
+	var ser []DeleteUserSerializers
+	//klog.Info(c.Request.Body)
+	if err := c.ShouldBind(&ser); err != nil {
+		klog.Errorf("bind params error: %s", err.Error())
+		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
+	}
+	klog.Info(ser)
+	for _, du := range ser {
+		err := u.models.UserManager.Delete(du.Name)
+		if err != nil {
+			klog.Errorf("delete user %s error: %s", c, err.Error())
+			return &utils.Response{Code: code.DeleteError, Msg: err.Error()}
+		}
+	}
+	return &utils.Response{Code: code.Success}
 }

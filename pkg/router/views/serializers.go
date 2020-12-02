@@ -20,3 +20,7 @@ type ClusterCreateSerializers struct {
 type DeleteClusterSerializers struct {
 	Name string `json:"name"`
 }
+
+type DeleteUserSerializers struct {
+	Name string `json:"name"`
+}

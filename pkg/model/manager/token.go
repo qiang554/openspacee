@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"github.com/openspacee/osp/pkg/model/types"
+	"time"
 )
 
 type TokenManager struct {
@@ -14,15 +15,15 @@ func NewTokenManager(redisClient *redis.Client) *TokenManager {
 	return &TokenManager{
 		CommonManager{
 			modelKey: "osp:token",
-			Context: context.Background(),
-			client: redisClient,
+			Context:  context.Background(),
+			client:   redisClient,
 		},
 	}
 }
 
 func (tk *TokenManager) Create(tkObj *types.Token) error {
 
-	if err := tk.CommonManager.Save(tkObj.Token.String(), tkObj, 43200, false); err != nil {
+	if err := tk.CommonManager.Save(tkObj.Token.String(), tkObj, 43200*time.Second, false); err != nil {
 		return err
 	}
 	return nil

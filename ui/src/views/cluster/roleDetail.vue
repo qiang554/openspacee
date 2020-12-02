@@ -105,70 +105,6 @@
             <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
         </el-collapse-item>
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
-          <div class="msgClass">
-            <el-table
-              v-if="roleEvents && roleEvents.length > 0"
-              :data="roleEvents"
-              class="table-fix"
-              tooltip-effect="dark"
-              style="width: 100%"
-              v-loading="eventLoading"
-              :cell-style="cellStyle"
-              :default-sort = "{prop: 'event_time', order: 'descending'}"
-              >
-              <el-table-column
-                prop="type"
-                label="类型"
-                min-width="25"
-                show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column
-                prop="object"
-                label="对象"
-                min-width="55"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="reason"
-                label="原因"
-                min-width="50"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.reason ? scope.row.reason : "—" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="message"
-                label="信息"
-                min-width="120"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.message ? scope.row.message : "—" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="触发时间"
-                min-width="50"
-                show-overflow-tooltip>
-              </el-table-column>
-            </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
-          </div>
-        </el-collapse-item>
       </el-collapse>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
@@ -185,9 +121,6 @@
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
 import { getRole, deleteRoles, updateRole } from '@/api/role'
-import { listEndpoints } from '@/api/endpoints'
-import { listEvents, buildEvent } from '@/api/event'
-// import { listPods, containerClass, buildPods, podMatch, deletePods } from '@/api/pods'
 import { Message } from 'element-ui'
 
 export default {
@@ -204,12 +137,6 @@ export default {
       cellStyle: {border: 0},
       loading: true,
       originRole: undefined,
-      // pods: [],
-      endpoints: [],
-      selectContainer: '',
-      selectPodName: '',
-      roleEvents: [],
-      eventLoading: true,
     }
   },
   created() {
@@ -225,31 +152,6 @@ export default {
         let newRv = newObj.resource.metadata.resourceVersion
         if (this.role.resource_version < newRv) {
           this.originRole = newObj.resource
-        }
-      }
-    },
-    eventWatch: function (newObj) {
-      if (newObj && this.originRole) {
-        let event = newObj.resource
-        if (event.involvedObject.namespace !== this.role.namespace) return
-        if (event.involvedObject.uid !== this.role.uid) return
-        let newUid = newObj.resource.metadata.uid
-        if (newObj.event === 'add') {
-          this.roleEvents.push(buildEvent(event))
-        } else if (newObj.event == 'update') {
-          let newRv = newObj.resource.metadata.resourceVersion
-          for (let i in this.roleEvents) {
-            let d = this.roleEvents[i]
-            if (d.uid === newUid) {
-              if (d.resource_version < newRv){
-                let newEvent = buildEvent(newObj.resource)
-                this.$set(this.roleEvents, i, newEvent)
-              }
-              break
-            }
-          }
-        } else if (newObj.event === 'delete') {
-          this.roleEvents = this.roleEvents.filter(( { uid } ) => uid !== newUid)
         }
       }
     },
@@ -278,27 +180,20 @@ export default {
     roleWatch: function() {
       return this.$store.getters["ws/rolesWatch"]
     },
-    eventWatch: function() {
-      return this.$store.getters["ws/eventWatch"]
-    },
   },
   methods: {
     fetchData: function() {
       this.originRole = null
-      this.roleEvents = []
       this.loading = true
-      this.eventLoading = true
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       if (this.kind === 'Role' && !this.namespace) {
         Message.error("获取命名空间参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       var namespace = this.namespace;
@@ -306,24 +201,14 @@ export default {
       if (!this.roleName) {
         Message.error("获取Role名称参数异常，请刷新重试")
         this.loading = false
-        this.eventLoading = false
         return
       }
       getRole(cluster, namespace, this.roleName, this.kind).then(response => {
         this.loading = false
         this.originRole = response.data
 
-        listEvents(cluster, this.originRole.metadata.uid).then(response => {
-          this.eventLoading = false
-          if (response.data) {
-            this.roleEvents = response.data.length > 0 ? response.data : []
-          }
-        }).catch(() => {
-          this.eventLoading = false
-        })
       }).catch(() => {
         this.loading = false
-        this.eventLoading = false
       })
     },
     buildRole: function(role) {
