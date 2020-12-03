@@ -12,13 +12,27 @@
         <el-form-item label="状态">
           <span>{{ persistentVolume.status.phase }}</span>
         </el-form-item>
-        <el-form-item label="Capacity">
+        <el-form-item label="容量">
           <span>{{ persistentVolume.spec.capacity.storage }}</span>
         </el-form-item>
-        <el-form-item label="AccessMode">
+        <el-form-item label="访问模式">
           <template v-for="key in persistentVolume.spec.accessModes" >
             <span :key="key" class="back-class">{{key}} <br/></span>
           </template>
+        </el-form-item>
+        <el-form-item label="存储声明">
+          <span v-if="persistentVolume.spec.claimRef">
+            {{ persistentVolume.spec.claimRef.namespace + '/' + persistentVolume.spec.claimRef.name }}
+          </span>
+        </el-form-item>
+        <el-form-item label="存储类">
+          <span>{{ persistentVolume.spec.storageClassName }}</span>
+        </el-form-item>
+        <el-form-item label="存储类型">
+          <span>{{ persistentVolume.spec.volumeMode }}</span>
+        </el-form-item>
+        <el-form-item label="重声明策略">
+          <span>{{ persistentVolume.spec.persistentVolumeReclaimPolicy }}</span>
         </el-form-item>
         <el-form-item label="标签">
           <span v-if="!persistentVolume.metadata.labels">——</span>
@@ -28,25 +42,46 @@
         </el-form-item>
       </el-form>
 
-      <el-collapse v-model="activeNames" @change="handleChange">
-        <el-collapse-item title="Claim" name="1" v-if="persistentVolume.spec && persistentVolume.spec.claimRef">
-          <el-form label-position="left" class="pod-item" label-width="120px" v-if="persistentVolume.spec">
-            <el-form-item label="类型">
-              <span>{{ persistentVolume.spec.claimRef.kind }}</span>
-            </el-form-item>
-            <el-form-item label="名称">
-              <span>{{ persistentVolume.spec.claimRef.name }}</span>
-            </el-form-item>
-            <el-form-item label="NameSpace">
-              <span>{{ persistentVolume.spec.claimRef.namespace }}</span>
-            </el-form-item>
-          </el-form>
-        </el-collapse-item>
-
-        <el-collapse-item title="Events" name="2">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
+      <el-tabs value="back" style="padding: 0px 8px;">
+        <el-tab-pane label="后端存储" name="back">
+          <div v-for="(val, key) in persistentVolume.spec" :key="key">
+            <template v-if="pvSpec.indexOf(key) < 0">
+              <div style="margin: 0px 0px 5px 20px;">{{ key }}</div>
+              <div class="msgClass">
+                <el-table
+                  :data="dictToList(val)"
+                  class="table-fix"
+                  tooltip-effect="dark"
+                  style="width: 100%"
+                  v-loading="eventLoading"
+                  :cell-style="cellStyle"
+                  :default-sort = "{prop: 'event_time', order: 'descending'}"
+                  >
+                  <el-table-column
+                    prop="key"
+                    label="键"
+                    min-width="50"
+                    show-overflow-tooltip>
+                  </el-table-column>
+                  <el-table-column
+                    prop="val"
+                    label="值"
+                    show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <span v-if="scope.row.isDict">
+                        <div v-for="(val, key) in scope.row.val" :key="key">
+                          {{ key }}: {{ val }}
+                        </div>
+                      </span>
+                      <span v-else>{{ scope.row.val }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </template>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="事件" name="events">
           <div class="msgClass">
             <el-table
               v-if="persistentVolumeEvents && persistentVolumeEvents.length > 0"
@@ -104,11 +139,10 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
+            <div v-else style="padding: 25px 15px;color: #909399; text-align: center">暂无数据</div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
-
+        </el-tab-pane>
+      </el-tabs>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -144,7 +178,9 @@ export default {
       selectContainer: '',
       eventLoading: true,
       activeNames: ["1"],
-      persistentVolumeEvents: []
+      persistentVolumeEvents: [],
+      pvSpec: ['capacity', 'accessModes', 'claimRef', 'persistentVolumeReclaimPolicy', 
+               'storageClassName', 'mountOptions', 'volumeMode', 'nodeAffinity']
     }
   },
   created() {
@@ -239,6 +275,22 @@ export default {
         // console.log(e) 
       })
     },
+    dictToList: function(obj) {
+      var l = []
+      for(var k in obj) {
+        var o = {
+          key: k,
+          val: obj[k],
+          isDict: false,
+        }
+        console.log(Object.prototype.toString.call(obj[k]), obj[k])
+        if(Object.prototype.toString.call(obj[k]) === '[object Object]') {
+          o.isDict = true
+        }
+        l.push(o)
+      }
+      return l
+    }
   },
 }
 </script>
@@ -271,6 +323,11 @@ export default {
 }
 .name-class:hover {
   color: #409eff;
+}
+
+.msgClass {
+  margin: 8px 10px 15px 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 </style>
 
@@ -326,9 +383,6 @@ export default {
 }
 .el-dialog__body {
   padding-top: 5px;
-}
-.msgClass {
-  margin: 0px 25px;
 }
 .msgClass .el-table::before {
   height: 0px;

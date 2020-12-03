@@ -143,7 +143,7 @@ export default {
             if (cluster) {
               listStorageClass(cluster).then(response => {
                     this.loading = false
-                    this.originStorageClass = response.data
+                    this.originStorageClass = response.data ? response.data : []
                 }).catch(() => {
                     this.loading = false
                 })

@@ -1,60 +1,81 @@
 <template>
   <div>
     <clusterbar :titleName="titleName" :editFunc="getPersistentVolumeClaimYaml" />
-    <div class="dashboard-container">
-      <el-form label-position="left" class="pod-item" label-width="180px" v-if="PersistentVolumeClaim.metadata">
+    <div class="dashboard-container" v-loading="loading">
+      <el-form label-position="left" class="pod-item" label-width="120px">
         <el-form-item label="名称">
           <span>{{ PersistentVolumeClaim.metadata.name }}</span>
         </el-form-item>
         <el-form-item label="创建时间">
           <span>{{ PersistentVolumeClaim.metadata.creationTimestamp }}</span>
         </el-form-item>
+        <el-form-item label="命名空间">
+          <span>{{ PersistentVolumeClaim.metadata.namespace }}</span>
+        </el-form-item>
         <el-form-item label="状态">
           <span>{{ PersistentVolumeClaim.status.phase }}</span>
         </el-form-item>
-        <el-form-item label="Namespace">
-          <span>{{ PersistentVolumeClaim.metadata.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="Capacity">
+        <el-form-item label="容量">
           <span>{{ PersistentVolumeClaim.spec.resources.requests.storage }}</span>
         </el-form-item>
-        <el-form-item label="storageClassName">
-          <span v-if="!PersistentVolumeClaim.spec.storageClassName">——</span>
+        <el-form-item label="存储卷">
+          <span>{{ PersistentVolumeClaim.spec.volumeName }}</span>
+        </el-form-item>
+        <el-form-item label="存储类">
+          <span v-if="!PersistentVolumeClaim.spec.storageClassName">—</span>
           <span v-else>{{ PersistentVolumeClaim.spec.storageClassName }}</span>
         </el-form-item>
-        <el-form-item label="AccessMode">
+        <el-form-item label="访问模式">
           <template v-for="key in PersistentVolumeClaim.spec.accessModes" >
             <span :key="key" class="back-class">{{key}} <br/></span>
           </template>
         </el-form-item>
-        <el-form-item label="Finalizers">
-          <span v-if="!PersistentVolumeClaim.metadata.finalizers">——</span>
-          <template v-else v-for="key in PersistentVolumeClaim.metadata.finalizers" >
-            <span :key="key" class="back-class">{{key}}<br/></span>
-          </template>
+        <el-form-item label="存储类型">
+          <span>{{ PersistentVolumeClaim.spec.volumeMode }}</span>
         </el-form-item>
       </el-form>
 
-      <el-collapse v-model="activeNames" @change="handleChange">
-        <el-collapse-item title="Selector" name="1" v-if="PersistentVolumeClaim.spec && PersistentVolumeClaim.spec.selector">
-          <el-form label-position="left" class="pod-item" label-width="180px">
-            <el-form-item label="Match Labels">
-              <template v-for="(key, val) in PersistentVolumeClaim.spec.selector.matchLabels">
-                <span :key="key" class="back-class">{{key}}:{{val}}</span>
-              </template>
-            </el-form-item>
-            <el-form-item label="Match Expressions">
-              <span v-if="!PersistentVolumeClaim.spec.selector.matchExpressions">——</span>
-              <template v-else v-for="(key, val) in PersistentVolumeClaim.spec.selector.matchExpressions">
-                <span :key="key" class="back-class">{{key}}:{{val}}</span>
-              </template>
-            </el-form-item>
-          </el-form>
-        </el-collapse-item>
-        <el-collapse-item title="Events" name="2">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
+      <el-tabs value="resource" style="padding: 0px 8px;">
+        <el-tab-pane label="资源要求" name="resource">
+          <div class="msgClass">
+            <div v-if="PersistentVolumeClaim.spec.resources">
+              <el-form label-position="left" class="pod-item" label-width="150px">
+                <el-form-item label="Requests">
+                  <span v-if="!PersistentVolumeClaim.spec.resources.requests">—</span>
+                  <template v-else v-for="(val, key) in PersistentVolumeClaim.spec.resources.requests">
+                    <span :key="key" class="back-class">{{key}}: {{val}}</span>
+                  </template>
+                </el-form-item>
+                <el-form-item label="Limits">
+                  <span v-if="!PersistentVolumeClaim.spec.resources.limits">—</span>
+                  <template v-else v-for="(val, key) in PersistentVolumeClaim.spec.resources.limits">
+                    <span :key="key" class="back-class">{{key}}: {{val}}</span>
+                  </template>
+                </el-form-item>
+              </el-form>
+            </div>
+            <div v-else style="padding: 25px 15px; color: #909399; text-align: center">无存储资源要求</div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="选择器" name="selector">
+          <div class="msgClass">
+            <el-form label-position="left" class="pod-item" label-width="150px">
+              <el-form-item label="Match Labels">
+                <span v-if="!PersistentVolumeClaim.spec.selector || !PersistentVolumeClaim.spec.selector.matchLabels">—</span>
+                <template v-else v-for="(val, key) in PersistentVolumeClaim.spec.selector.matchLabels">
+                  <span :key="key" class="back-class">{{key}}: {{val}}</span>
+                </template>
+              </el-form-item>
+              <el-form-item label="Match Expressions">
+                <span v-if="!PersistentVolumeClaim.spec.selector || !PersistentVolumeClaim.spec.selector.matchExpressions">—</span>
+                <template v-else v-for="(key, val) in PersistentVolumeClaim.spec.selector.matchExpressions">
+                  <span :key="key" class="back-class">{{key}}:{{val}}</span>
+                </template>
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="事件" name="events">
           <div class="msgClass">
             <el-table
               v-if="persistentVolumeClaimEvents && persistentVolumeClaimEvents.length > 0"
@@ -112,11 +133,10 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
+            <div v-else style="padding: 25px 15px; color: #909399; text-align: center">暂无事件发生</div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
-
+        </el-tab-pane>
+      </el-tabs>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -258,15 +278,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .my-table >>> .el-table__row>td{
-  /* 去除表格线 */
-  border: none;
-}
-
-.my-table >>> .el-table::before {
-	height: 0px;
-}
-
 .dashboard {
   &-container {
     margin: 10px 30px;
@@ -284,15 +295,52 @@ export default {
   cursor: pointer;
 }
 .name-class:hover {
-  color: #409eff;
+  color: #409EFF;
+}
+.download {
+  // width: 70px;
+  // height: 40px;
+  position: relative;
+
+  .download-right {
+    position: absolute;
+    right: 70px;
+    top: 0px;
+    background: #FFF;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    border: 1px solid #EBEEF5;
+    .download-item {
+      display: inline-block;
+      margin-right: -8px;
+      white-space: nowrap;
+      width: auto;
+      padding: 0px 12px;
+      cursor: pointer;
+      color: #606266;
+      .item-txt {
+        flex: 1;
+        display: flex;
+        // flex-wrap: nowrap;
+        align-items:center;
+        font-size: 14px;
+      }
+    }
+    .download-item:hover {
+      // background: #1f2326;
+      color: #66b1ff;
+      // border-radius: 6px;
+    }
+  }
+}
+
+.msgClass {
+  margin: 8px 10px 15px 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 </style>
 
 <style>
-/* .el-table__expand-icon {
-  display: none;
-} */
-.el-table__expanded-cell[class*='cell'] {
+.el-table__expanded-cell[class*=cell] {
   padding-top: 5px;
 }
 .table-expand {
@@ -308,21 +356,32 @@ export default {
   margin-bottom: 0;
   width: 100%;
 }
-
-.pod-item {
-  margin: 20px 20px 20px 5px;
+/* 
+.item-class {
+  padding: 20px 20px 20px 5px;
   font-size: 0;
 }
+
+.item-class  */
+
+.pod-item {
+  padding: 5px 20px 10px 15px;
+  font-size: 14px;
+}
 .pod-item label {
-  width: 90px;
+  /* width: 120px; */
   color: #99a9bf;
   font-weight: 400;
+  /* display: inline-block; */
 }
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  width: 40%;
+  /* width: 50%; */
 }
+/* .pod-item .el-form-item__content{
+  float: left;
+} */
 .pod-item span {
   color: #606266;
 }
@@ -341,9 +400,9 @@ export default {
 .el-dialog__body {
   padding-top: 5px;
 }
-.msgClass {
+/* .msgClass {
   margin: 0px 25px;
-}
+} */
 .msgClass .el-table::before {
   height: 0px;
 }
