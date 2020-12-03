@@ -3,113 +3,7 @@
     <clusterbar :titleName="titleName" :delFunc="deletePods" :editFunc="getPodYaml"/>
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
-      <el-table
-        ref="table"
-        :data="containers"
-        class="table-fix"
-        tooltip-effect="dark"
-        style="width: 100%"
-        v-loading="loading"
-        :cell-style="cellStyle"
-        :default-sort = "{prop: 'name'}"
-        >
-        <el-table-column type="expand" width="20" style="overflow:hidden">
-          <template slot-scope="props">
-            <el-form label-position="left" inline class="table-expand">
-              <el-form-item label="容器名称">
-                <span>{{ props.row.name }}</span>
-              </el-form-item>
-              <el-form-item label="状态">
-                <span>{{ props.row.status }}</span>
-              </el-form-item>
-              <el-form-item label="镜像">
-                <span>{{ props.row.image }}</span>
-              </el-form-item>
-              <el-form-item label="启动命令" v-if="props.row.command.length">
-                <template v-for="a in props.row.command">
-                  <span :key="a">{{a}}<br/></span>
-                </template>
-              </el-form-item>
-              <el-form-item label="启动参数" v-if="props.row.args.length">
-                <template v-for="a in props.row.args">
-                  <span :key="a">{{a}}<br/></span>
-                </template>
-              </el-form-item>
-              <el-form-item label="端口" v-if="props.row.ports.length">
-                <template v-for="a in props.row.ports">
-                  <span :key="a.name">{{a.name ? `${a.name}:` : ''}} {{a.containerPort}}/{{a.protocol}}<br/></span>
-                </template>
-              </el-form-item>
-              <el-form-item label="环境变量" v-if="props.row.env.length">
-                <!-- <span>{{ props.row.env }}</span> -->
-                <template v-for="(i, a) in props.row.env">
-                  <span :key="a">
-                    {{ envStr(i) }}<br/>
-                  </span>
-                </template>
-              </el-form-item>
-              <el-form-item label="目录挂载" v-if="props.row.volume_mounts.length">
-                <template v-for="a in props.row.volume_mounts">
-                  <span :key="a.name">{{a.name}} -> {{a.mountPath}} ({{a.readOnly ? "ro" : "rw"}})<br/></span>
-                </template>
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="name"
-          label="容器名称"
-          show-overflow-tooltip>
-          <template slot-scope="scope">
-            <span class="name-class" @click="toogleExpand(scope.row)">
-              {{ scope.row.name }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="image"
-          label="镜像"
-          min-width="150"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="restarts"
-          label="重启"
-          min-width="30"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="start_time"
-          label="开始时间"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="status"
-          label="状态"
-          min-width="50"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          label=""
-          show-overflow-tooltip
-          min-width="20">
-          <template slot-scope="scope">
-            <el-dropdown size="medium" >
-              <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="selectContainer = scope.row.name; log = true">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="log" /> 
-                  <span style="margin-left: 5px;">日志</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="selectContainer = scope.row.name; terminal = true">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="terminal" /> 
-                  <span style="margin-left: 5px;">终端</span>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </template>
-        </el-table-column>
-      </el-table>
+      
 
         <!-- <el-collapse-item name="detail"> -->
           <!-- <template slot="title">
@@ -146,36 +40,183 @@
               </template>
             </el-form-item>
             <el-form-item label="注解">
-              <span v-if="!pod.annonations">——</span>
+              <span v-if="!pod.annonations">—</span>
               
               <template v-else v-for="(val, key) in pod.annonations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
           </el-form>
-        <!-- </el-collapse-item> -->
-      <!-- <el-collapse class="podCollapse" :value="['volumes', 'conditions', 'events']"> -->
-      <el-collapse class="podCollapse">
-        <el-collapse-item title="Volumes" name="volumes">
-          <template slot="title">
-            <span class="title-class">Volumes</span>
-          </template>
-          <div v-for="v in pod.volumes" :key="v.name" style="margin: 5px 25px; font-size: 14px; color: #606266">
-            <span style="margin-right: 8px;"><b>{{v.name}}</b></span><br/>
+      <el-tabs value="containers" style="padding: 0px 8px;">
+        <el-tab-pane label="容器组" name="containers">
+          <div class="msgClass">
+            <el-table
+            ref="table"
+            :data="containers"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            v-loading="loading"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'name'}"
+            >
+              <el-table-column type="expand" width="20" style="overflow:hidden">
+                <template slot-scope="props">
+                  <el-form label-position="left" inline class="table-expand">
+                    <el-form-item label="名称">
+                      <span>{{ props.row.name }}</span>
+                    </el-form-item>
+                    <el-form-item label="状态">
+                      <span>{{ props.row.status }}</span>
+                    </el-form-item>
+                    <el-form-item label="镜像">
+                      <span>{{ props.row.image }}</span>
+                    </el-form-item>
+                    <el-form-item label="启动命令" v-if="props.row.command.length">
+                      <template v-for="a in props.row.command">
+                        <span :key="a">{{a}}<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="启动参数" v-if="props.row.args.length">
+                      <template v-for="a in props.row.args">
+                        <span :key="a">{{a}}<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="端口" v-if="props.row.ports.length">
+                      <template v-for="a in props.row.ports">
+                        <span :key="a.name">{{a.name ? `${a.name}:` : ''}} {{a.containerPort}}/{{a.protocol}}<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="环境变量" v-if="props.row.env.length">
+                      <!-- <span>{{ props.row.env }}</span> -->
+                      <template v-for="(i, a) in props.row.env">
+                        <span :key="a">
+                          {{ envStr(i) }}<br/>
+                        </span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="目录挂载" v-if="props.row.volume_mounts.length">
+                      <template v-for="a in props.row.volume_mounts">
+                        <span :key="a.name">{{a.name}} -> {{a.mountPath}} ({{a.readOnly ? "ro" : "rw"}})<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="资源" v-if="props.row.resources && (props.row.resources.requests || props.row.resources.limits)">
+                      <div>
+                        <span style="width: 80px; display:inline-block"></span>
+                        <span style="width: 80px; display: inline-block;">预留</span>
+                        <span style="display: inline-block;">限制</span>
+                      </div>
+                      <div style="margin-top: -10px;">
+                        <span style="width: 80px; display:inline-block">cpu</span>
+                        <span style="width: 80px; display: inline-block;">{{ resourceFor(props.row.resources, "requests", "cpu") }}</span>
+                        <span style="display: inline-block;">{{ resourceFor(props.row.resources, "limits", "cpu") }}</span>
+                      </div>
+                      <div style="margin-top: -10px;">
+                        <span style="width: 80px; display:inline-block">memory</span>
+                        <span style="width: 80px; display: inline-block;">{{ resourceFor(props.row.resources, "requests", "memory") }}</span>
+                        <span style="display: inline-block;">{{ resourceFor(props.row.resources, "limits", "memory") }}</span>
+                      </div>
+                    </el-form-item>
+                    <el-form-item label="健康检查" v-if="props.row.readiness_probe || props.row.liveness_probe">
+                      <div v-for="p in ['readiness_probe', 'liveness_probe']" :key='p'>
+                        <div v-if="props.row[p]">
+                          <div>
+                            <span style="margin-right: 15px; font-weight: 450;">
+                              {{ p == 'readiness_probe' ? 'ReadinessProbe' : 'LivenessProbe' }}
+                            </span>
+                          </div>
+                          <div style="margin-top: -15px">
+                            <span v-for="(i, c) in props.row[p]" :key="c">
+                              <span class="back-class" v-if="['httpGet', 'exec', 'tcpSocket'].indexOf(c) > -1">
+                                {{ c }}: {{ i }}
+                              </span>
+                            </span>
+                          </div>
+                          <div style="margin-top: -10px;">
+                            <span  v-for="(i, c) in props.row[p]" :key="c">
+                              <span class="back-class" v-if="['httpGet', 'exec', 'tcpSocket'].indexOf(c) <= -1">
+                                {{ c }}: {{ i }}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </el-form-item>
+                  </el-form>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="name"
+                label="名称"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span class="name-class" @click="toogleExpand(scope.row)">
+                    {{ scope.row.name }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="image"
+                label="镜像"
+                min-width="150"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="restarts"
+                label="重启"
+                min-width="30"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="start_time"
+                label="开始时间"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="status"
+                label="状态"
+                min-width="50"
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                label=""
+                show-overflow-tooltip
+                min-width="20">
+                <template slot-scope="scope">
+                  <el-dropdown size="medium" >
+                    <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item @click.native.prevent="selectContainer = scope.row.name; log = true">
+                        <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="log" /> 
+                        <span style="margin-left: 5px;">日志</span>
+                      </el-dropdown-item>
+                      <el-dropdown-item @click.native.prevent="selectContainer = scope.row.name; terminal = true">
+                        <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.2em" icon-class="terminal" /> 
+                        <span style="margin-left: 5px;">终端</span>
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="挂载存储" name="second">
+          <div class="msgClass" style="padding: 10px 0px;">
+          <div v-for="v in pod.volumes" :key="v.name" style="margin: 15px 25px; font-size: 14px; color: #606266">
+            <div style="margin-bottom: 6px;"><b>{{v.name}}</b></div>
             <template v-for="(val, key) in v">
                 <span v-if="key !== 'name'" :key="key"> 
-                  <span class="back-class">type: {{key}}</span>
+                  <span class="back-class">{{key}}</span>
                   <span v-for="(ival, ikey) in val" :key="ikey" class="back-class">
                     {{ikey}}: {{ival}}
                   </span>
                 </span>
               </template>
           </div>
-        </el-collapse-item>
-        <el-collapse-item title="Conditions" name="conditions">
-          <template slot="title">
-            <span class="title-class">Conditions</span>
-          </template>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="条件状态" name="conditions">
           <div class="msgClass">
             <el-table
               :data="pod.conditions"
@@ -226,14 +267,11 @@
               </el-table-column>
             </el-table>
           </div>
-        </el-collapse-item>
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
+        </el-tab-pane>
+        <el-tab-pane label="事件" name="events">
           <div class="msgClass">
-            <template v-if="podEvents && podEvents.length > 0">
             <el-table
+              v-if="podEvents && podEvents.length > 0"
               :data="podEvents"
               class="table-fix"
               tooltip-effect="dark"
@@ -288,11 +326,10 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            </template>
-            <div v-else style="text-align: center; color: #909399;">暂无数据</div>
+            <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无事件发生</div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
+        </el-tab-pane>
+      </el-tabs>
 
       <el-dialog title="终端" :visible.sync="terminal" :close-on-click-modal="false" width="80%" top="55px">
         <terminal v-if="terminal" :cluster="cluster" :namespace="namespace" :pod="podName" :container="selectContainer"></terminal>
@@ -315,7 +352,7 @@
 
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
-import { getPod, deletePods, updatePod, buildPods } from '@/api/pods'
+import { getPod, deletePods, updatePod, buildPods, resourceFor } from '@/api/pods'
 import { listEvents, buildEvent } from '@/api/event'
 import { Message } from 'element-ui'
 import { Terminal } from '@/views/components'
@@ -342,6 +379,8 @@ export default {
       selectContainer: '',
       podEvents: [],
       eventLoading: true,
+      activeName: "first",
+      resourceFor: resourceFor,
     }
   },
   created() {
@@ -564,6 +603,10 @@ export default {
 .name-class:hover {
   color: #409EFF;
 }
+.msgClass {
+  margin: 8px 10px 15px 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
 </style>
 
 <style>
@@ -618,9 +661,6 @@ export default {
 }
 .el-dialog__body {
   padding-top: 5px;
-}
-.msgClass {
-  margin: 0px 25px;
 }
 .msgClass .el-table::before {
   height: 0px;

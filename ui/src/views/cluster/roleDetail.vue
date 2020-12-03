@@ -33,79 +33,67 @@
           </template>
         </el-form-item> -->
       </el-form>
-      
-      <el-collapse class="podCollapse" :value="['rules', 'events']">
-        <!-- <el-collapse-item title="Secrets" name="secrets">
-          <template slot="title">
-            <span class="title-class">Secrets</span>
-          </template>
-          <div class="msgClass">
-            <span>{{ role.secrets }}</span>
-          </div>
-        </el-collapse-item> -->
-        <el-collapse-item title="Rules" name="rules">
-          <template slot="title">
-            <span class="title-class">Rules</span>
-          </template>
-          <div class="msgClass">
-            <el-table
-              v-if="role.rules && role.rules.length > 0"
-              :data="role.rules"
-              class="table-fix"
-              tooltip-effect="dark"
-              style="width: 100%"
-              :cell-style="cellStyle"
-              :default-sort = "{prop: 'event_time', order: 'descending'}"
-              >
-              <el-table-column
-                prop="resources"
-                label="资源"
-                min-width="45"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.resources.join(',') }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="verbs"
-                label="权限"
-                min-width="35"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.verbs.join(',') }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="apiGroups"
-                label="apiGroups"
-                min-width="20"
-                show-overflow-tooltip>
-                <!-- <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.reason ? scope.row.reason : "—" }}
-                  </span>
-                </template> -->
-              </el-table-column>
-              <el-table-column
-                prop="resourceNames"
-                label="资源名称"
-                min-width="40"
-                show-overflow-tooltip>
-                <!-- <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.message ? scope.row.message : "—" }}
-                  </span>
-                </template> -->
-              </el-table-column>
-            </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
-          </div>
-        </el-collapse-item>
-      </el-collapse>
+
+      <div style="padding: 0px 8px;">
+        <div>Rules</div>
+        <div class="msgClass" style="margin: 15px 10px 30px 10px;">
+          <el-table
+            v-if="role.rules && role.rules.length > 0"
+            :data="role.rules"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'event_time', order: 'descending'}"
+            >
+            <el-table-column
+              prop="resources"
+              label="资源"
+              min-width="45"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>
+                  {{ scope.row.resources.join(',') }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="verbs"
+              label="权限"
+              min-width="35"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>
+                  {{ scope.row.verbs.join(',') }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="apiGroups"
+              label="apiGroups"
+              min-width="20"
+              show-overflow-tooltip>
+              <!-- <template slot-scope="scope">
+                <span>
+                  {{ scope.row.reason ? scope.row.reason : "—" }}
+                </span>
+              </template> -->
+            </el-table-column>
+            <el-table-column
+              prop="resourceNames"
+              label="资源名称"
+              min-width="40"
+              show-overflow-tooltip>
+              <!-- <template slot-scope="scope">
+                <span>
+                  {{ scope.row.message ? scope.row.message : "—" }}
+                </span>
+              </template> -->
+            </el-table-column>
+          </el-table>
+          <div v-else style="color: #909399; text-align: center">暂无数据</div>
+        </div>
+      </div>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -349,6 +337,11 @@ export default {
     }
   }
 }
+
+.msgClass {
+  margin: 8px 10px 15px 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
 </style>
 
 <style>
@@ -392,7 +385,7 @@ export default {
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  /* width: 50%; */
+  width: 100%;
 }
 /* .pod-item .el-form-item__content{
   float: left;
@@ -415,9 +408,9 @@ export default {
 .el-dialog__body {
   padding-top: 5px;
 }
-.msgClass {
+/* .msgClass {
   margin: 0px 25px;
-}
+} */
 .msgClass .el-table::before {
   height: 0px;
 }

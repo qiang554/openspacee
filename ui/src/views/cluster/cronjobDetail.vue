@@ -3,97 +3,7 @@
     <clusterbar :titleName="titleName" :delFunc="deleteCronJobs" :editFunc="getCronJobYaml"/>
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
-      <el-table
-        ref="table"
-        :data="jobs"
-        class="table-fix"
-        tooltip-effect="dark"
-        style="width: 100%"
-        v-loading="loading"
-        :cell-style="cellStyle"
-        :default-sort = "{prop: 'name'}"
-        >
-        <el-table-column
-          prop="name"
-          label="Job名称"
-          min-width="45"
-          show-overflow-tooltip>
-          <template slot-scope="scope">
-            <span class="name-class" v-on:click="nameJobClick(scope.row.namespace, scope.row.name)">
-              {{ scope.row.name }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="namespace"
-          label="命名空间"
-          min-width="35"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="ready_replicas"
-          label="Pods"
-          min-width="45"
-          show-overflow-tooltip>
-          <template slot-scope="scope">
-            <span v-if="scope.row.active > 0" class="back-class">
-              {{ scope.row.active }} Running
-            </span>
-            <span v-if="scope.row.succeeded > 0" class="back-class">
-              {{ scope.row.succeeded }} Succeeded
-            </span>
-            <span v-if="scope.row.failed > 0" class="back-class">
-              {{ scope.row.failed }} Failed
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="completions"
-          label="Completions"
-          min-width="30"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          prop="conditions"
-          label="状态"
-          min-width="30"
-          show-overflow-tooltip>
-          <template slot-scope="scope">
-            <template v-if="scope.row.conditions && scope.row.conditions.length > 0">
-              <span v-for="c in scope.row.conditions" :key="c">
-                {{ c }}
-              </span>
-            </template>
-            <span v-else>——</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="created"
-          label="创建时间"
-          min-width="40"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          label=""
-          show-overflow-tooltip
-          width="45">
-          <template slot-scope="scope">
-            <el-dropdown size="medium" >
-              <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
-                  <span style="margin-left: 5px;">详情</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="deleteJobs([{namespace: scope.row.namespace, name: scope.row.name}])">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
-                  <span style="margin-left: 5px;">删除</span>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </template>
-        </el-table-column>
-      </el-table>
+      
 
           <el-form label-position="left" inline class="pod-item">
             <el-form-item label="名称">
@@ -120,20 +30,250 @@
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
             </el-form-item>
-            <el-form-item label="注解">
+            <!-- <el-form-item label="注解">
               <span v-if="!cronjob.annotations">—</span>
               
               <template v-else v-for="(val, key) in cronjob.annotations">
                 <span :key="key">{{key}}: {{val}}<br/></span>
               </template>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
-        <!-- </el-collapse-item> -->
-      <el-collapse class="podCollapse">
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
+
+      <div style="padding: 0px 8px;">
+        <div>Jobs</div>
+        <div class="msgClass" style="margin: 15px 10px 30px 10px;">
+          <el-table
+            ref="table"
+            :data="jobs"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            v-loading="loading"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'name'}"
+            >
+            <el-table-column
+              prop="name"
+              label="名称"
+              min-width="45"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span class="name-class" v-on:click="nameJobClick(scope.row.namespace, scope.row.name)">
+                  {{ scope.row.name }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="namespace"
+              label="命名空间"
+              min-width="35"
+              show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+              prop="ready_replicas"
+              label="Pods"
+              min-width="45"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span v-if="scope.row.active > 0" class="back-class">
+                  {{ scope.row.active }} Running
+                </span>
+                <span v-if="scope.row.succeeded > 0" class="back-class">
+                  {{ scope.row.succeeded }} Succeeded
+                </span>
+                <span v-if="scope.row.failed > 0" class="back-class">
+                  {{ scope.row.failed }} Failed
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="completions"
+              label="Completions"
+              min-width="30"
+              show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+              prop="conditions"
+              label="状态"
+              min-width="30"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <template v-if="scope.row.conditions && scope.row.conditions.length > 0">
+                  <span v-for="c in scope.row.conditions" :key="c">
+                    {{ c }}
+                  </span>
+                </template>
+                <span v-else>——</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="created"
+              label="创建时间"
+              min-width="40"
+              show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+              label=""
+              show-overflow-tooltip
+              width="45">
+              <template slot-scope="scope">
+                <el-dropdown size="medium" >
+                  <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
+                      <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
+                      <span style="margin-left: 5px;">详情</span>
+                    </el-dropdown-item>
+                    <el-dropdown-item @click.native.prevent="deleteJobs([{namespace: scope.row.namespace, name: scope.row.name}])">
+                      <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
+                      <span style="margin-left: 5px;">删除</span>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+
+      <el-tabs value="containers" style="padding: 0px 8px;">
+        <el-tab-pane label="容器组" name="containers">
+          <div class="msgClass">
+            <el-table
+            ref="table"
+            :data="containers"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'name'}"
+            >
+              <el-table-column type="expand" width="20" style="overflow:hidden">
+                <template slot-scope="props">
+                  <el-form label-position="left" inline class="table-expand">
+                    <el-form-item label="容器名称">
+                      <span>{{ props.row.name }}</span>
+                    </el-form-item>
+                    <el-form-item label="镜像">
+                      <span>{{ props.row.image }}</span>
+                    </el-form-item>
+                    <el-form-item label="启动命令" v-if="props.row.command.length">
+                      <template v-for="a in props.row.command">
+                        <span :key="a">{{a}}<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="启动参数" v-if="props.row.args.length">
+                      <template v-for="a in props.row.args">
+                        <span :key="a">{{a}}<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="端口" v-if="props.row.ports.length">
+                      <template v-for="a in props.row.ports">
+                        <span :key="a.name">{{a.name ? `${a.name}:` : ''}} {{a.containerPort}}/{{a.protocol}}<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="环境变量" v-if="props.row.env.length">
+                      <!-- <span>{{ props.row.env }}</span> -->
+                      <template v-for="(i, a) in props.row.env">
+                        <span :key="a">
+                          {{ envStr(i) }}<br/>
+                        </span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="目录挂载" v-if="props.row.volume_mounts.length">
+                      <template v-for="a in props.row.volume_mounts">
+                        <span :key="a.name">{{a.name}} -> {{a.mountPath}} ({{a.readOnly ? "ro" : "rw"}})<br/></span>
+                      </template>
+                    </el-form-item>
+                    <el-form-item label="资源" v-if="props.row.resources && (props.row.resources.requests || props.row.resources.limits)">
+                      <div>
+                        <span style="width: 80px; display:inline-block"></span>
+                        <span style="width: 80px; display: inline-block;">预留</span>
+                        <span style="display: inline-block;">限制</span>
+                      </div>
+                      <div style="margin-top: -10px;">
+                        <span style="width: 80px; display:inline-block">cpu</span>
+                        <span style="width: 80px; display: inline-block;">{{ resourceFor(props.row.resources, "requests", "cpu") }}</span>
+                        <span style="display: inline-block;">{{ resourceFor(props.row.resources, "limits", "cpu") }}</span>
+                      </div>
+                      <div style="margin-top: -10px;">
+                        <span style="width: 80px; display:inline-block">memory</span>
+                        <span style="width: 80px; display: inline-block;">{{ resourceFor(props.row.resources, "requests", "memory") }}</span>
+                        <span style="display: inline-block;">{{ resourceFor(props.row.resources, "limits", "memory") }}</span>
+                      </div>
+                    </el-form-item>
+                    <el-form-item label="健康检查" v-if="props.row.readiness_probe || props.row.liveness_probe">
+                      <div v-for="p in ['readiness_probe', 'liveness_probe']" :key='p'>
+                        <div v-if="props.row[p]">
+                          <div>
+                            <span style="margin-right: 15px; font-weight: 450;">
+                              {{ p == 'readiness_probe' ? 'ReadinessProbe' : 'LivenessProbe' }}
+                            </span>
+                          </div>
+                          <div style="margin-top: -15px">
+                            <span v-for="(i, c) in props.row[p]" :key="c">
+                              <span class="back-class" v-if="['httpGet', 'exec', 'tcpSocket'].indexOf(c) > -1">
+                                {{ c }}: {{ i }}
+                              </span>
+                            </span>
+                          </div>
+                          <div style="margin-top: -10px;">
+                            <span  v-for="(i, c) in props.row[p]" :key="c">
+                              <span class="back-class" v-if="['httpGet', 'exec', 'tcpSocket'].indexOf(c) <= -1">
+                                {{ c }}: {{ i }}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </el-form-item>
+                  </el-form>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="name"
+                label="名称"
+                show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span class="name-class" @click="toogleExpand(scope.row)">
+                    {{ scope.row.name }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="image"
+                label="镜像"
+                min-width=""
+                show-overflow-tooltip>
+              </el-table-column>
+              <el-table-column
+                prop="image_pull_policy"
+                label="镜像拉取策略"
+                min-width=""
+                show-overflow-tooltip>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="挂载存储" name="volumes">
+          <div class="msgClass" style="padding: 10px 0px;">
+            <template v-if="cronjob.volumes">
+              <div v-for="v in cronjob.volumes" :key="v.name" style="margin: 15px 25px; font-size: 14px; color: #606266">
+                <div style="margin-bottom: 6px;"><b>{{v.name}}</b></div>
+                <template v-for="(val, key) in v">
+                  <span v-if="key !== 'name'" :key="key"> 
+                    <span class="back-class">{{key}}</span>
+                    <span v-for="(ival, ikey) in val" :key="ikey" class="back-class">
+                      {{ikey}}: {{ival}}
+                    </span>
+                  </span>
+                </template>
+              </div>
+            </template>
+            <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">无挂载外部存储</div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="事件" name="events">
           <div class="msgClass">
             <el-table
               v-if="cronjobEvents && cronjobEvents.length > 0"
@@ -191,10 +331,10 @@
                 show-overflow-tooltip>
               </el-table-column>
             </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
+            <div v-else style="color: #909399; text-align: center">暂无事件发生</div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
+        </el-tab-pane>
+      </el-tabs>
 
       <el-dialog title="终端" :visible.sync="terminalDialog" :close-on-click-modal="false" width="80%" top="55px">
         <terminal v-if="terminalDialog" :cluster="cluster" :namespace="namespace" :pod="selectPodName" :container="selectContainer"></terminal>
@@ -220,6 +360,7 @@ import { Clusterbar, Yaml } from '@/views/components'
 import { getCronJob, deleteCronJobs, updateCronJob } from '@/api/cronjob'
 import { listEvents, buildEvent } from '@/api/event'
 import { listJobs, deleteJobs, buildJobs } from '@/api/job'
+import { buildContainer, envStr, resourceFor } from '@/api/pods'
 import { Message } from 'element-ui'
 import { Terminal } from '@/views/components'
 import { Log } from '@/views/components'
@@ -249,6 +390,8 @@ export default {
       selectPodName: '',
       cronjobEvents: [],
       eventLoading: true,
+      resourceFor: resourceFor,
+      envStr: envStr,
     }
   },
   created() {
@@ -347,7 +490,23 @@ export default {
     },
     jobsWatch: function() {
       return this.$store.getters["ws/jobsWatch"]
-    }
+    },
+    containers: function() {
+      if (!this.originCronJob) return []
+      let containers = []
+      let tmpl = this.originCronJob.spec.jobTemplate.spec.template;
+      for (let c of tmpl.spec.containers) {
+        let bc = buildContainer(c)
+        containers.push(bc)
+      }
+      let init_containers = []
+      if (tmpl.spec.initContainers) {
+        for (let c of tmpl.spec.initContainers) {
+          init_containers.push(buildContainer(c))
+        }
+      }
+      return [...init_containers, ...containers]
+    },
   },
   methods: {
     fetchData: function() {
@@ -414,6 +573,7 @@ export default {
         label_selector: cronjob.spec.selector,
         labels: cronjob.metadata.labels,
         annotations: cronjob.metadata.annotations,
+        volumes: cronjob.spec.jobTemplate.spec.template.spec.volumes,
       }
       return p
     },
@@ -564,6 +724,11 @@ export default {
     }
   }
 }
+
+.msgClass {
+  margin: 6px 6px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
 </style>
 
 <style>
@@ -619,9 +784,9 @@ export default {
 .el-dialog__body {
   padding-top: 5px;
 }
-.msgClass {
+/* .msgClass {
   margin: 0px 25px;
-}
+} */
 .msgClass .el-table::before {
   height: 0px;
 }

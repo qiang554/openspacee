@@ -328,7 +328,7 @@ export default {
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  /* width: 50%; */
+  width: 100%;
 }
 /* .pod-item .el-form-item__content{
   float: left;
