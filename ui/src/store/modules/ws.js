@@ -56,6 +56,18 @@ const getters = {
   },
   rolesWatch: ( _, getters ) => {
     return getters.resourceWatch("role")
+  },
+  pvcsWatch: ( _, getters ) => {
+    return getters.resourceWatch("pvc")
+  },
+  pvsWatch: ( _, getters ) => {
+    return getters.resourceWatch("pv")
+  },
+  scsWatch: ( _, getters ) => {
+    return getters.resourceWatch("sc")
+  },
+  nodesWatch: ( _, getters ) => {
+    return getters.resourceWatch("node")
   }
 }
 

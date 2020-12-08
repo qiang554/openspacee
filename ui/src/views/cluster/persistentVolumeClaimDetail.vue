@@ -142,7 +142,7 @@
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
         <span slot="footer" class="dialog-footer">
           <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
-          <el-button plain @click="updatePersistentVolumeClaim" size="small">确 定</el-button>
+          <el-button plain @click="updatePersistentVolumeClaim()" size="small">确 定</el-button>
         </span>
       </el-dialog>
     </div>

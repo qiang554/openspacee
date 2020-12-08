@@ -1,6 +1,6 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" />
+    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" :delFunc="delFunc" />
     <div class="dashboard-container">
       <el-table
         ref="multipleTable"
@@ -12,6 +12,7 @@
         v-loading="loading"
         :cell-style="cellStyle"
         :default-sort = "{prop: 'name'}"
+        @selection-change="handleSelectionChange"
         row-key="uid"
       >
         <el-table-column
@@ -81,7 +82,7 @@
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                   <span style="margin-left: 5px;">修改</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="">
+                <el-dropdown-item @click.native.prevent="deletePvcs([{namespace: scope.row.namespace, name: scope.row.name}])">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                   <span style="margin-left: 5px;">删除</span>
                 </el-dropdown-item>
@@ -96,7 +97,7 @@
       <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
       <span slot="footer" class="dialog-footer">
         <el-button plain @click="yamlDialog = false" size="small">取 消</el-button>
-        <el-button plain size="small">确 定</el-button>
+        <el-button plain @click="updatePvc()" size="small">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -106,7 +107,8 @@
 <script>
 import { Clusterbar, Yaml } from '@/views/components'
 import { Message } from 'element-ui'
-import { listPersistentVolumeClaim, getPersistentVolumeClaim } from '@/api/persistent_volume_claim'
+import { listPersistentVolumeClaim, getPersistentVolumeClaim, deletePersistentVolumeClaims, 
+updatePersistentVolumeClaim, buildPvc } from '@/api/persistent_volume_claim'
 
 export default {
   name: "PersistentVolumeClaim",
@@ -126,11 +128,37 @@ export default {
       yamlDialog: false,
       yamlName: "",
       yamlValue: "",
-      yamlLoading: true
+      yamlLoading: true,
+      delFunc: undefined,
+      delPvcs: [],
     }
   },
   created() {
     this.fetchData()
+  },
+  watch: {
+    pvcsWatch: function (newObj) {
+      if (newObj) {
+        let newUid = newObj.resource.metadata.uid
+        let newRv = newObj.resource.metadata.resourceVersion
+        if (newObj.event === 'add') {
+          this.originPersistentVolumeClaims.push(buildPvc(newObj.resource))
+        } else if (newObj.event === 'update') {
+          for (let i in this.originPersistentVolumeClaims) {
+            let d = this.originPersistentVolumeClaims[i]
+            if (d.uid === newUid) {
+              if (d.resource_version < newRv){
+                let newDp = buildPvc(newObj.resource)
+                this.$set(this.originPersistentVolumeClaims, i, newDp)
+              }
+              break
+            }
+          }
+        } else if (newObj.event === 'delete') {
+          this.originPersistentVolumeClaims = this.originPersistentVolumeClaims.filter(( { uid } ) => uid !== newUid)
+        }
+      }
+    }
   },
   computed: {
     persistentVolumeClaim: function() {
@@ -141,6 +169,9 @@ export default {
         data.push(c)
       }
       return data
+    },
+    pvcsWatch: function() {
+      return this.$store.getters["ws/pvcsWatch"]
     }
   },
   methods: {
@@ -177,15 +208,17 @@ export default {
       }
     },
     getPersistentVolumeClaimYaml: function(namespace, name) {
+      this.yamlNamespace = ""
+      this.yamlName = ""
       const cluster = this.$store.state.cluster
       if (!cluster) {
         Message.error("获取集群参数异常，请刷新重试")
         return
       }
-      // if (!namespace) {
-      //   Message.error("获取命名空间参数异常，请刷新重试")
-      //   return
-      // }
+      if (!namespace) {
+        Message.error("获取命名空间参数异常，请刷新重试")
+        return
+      }
       if (!name) {
         Message.error("获取名称参数异常，请刷新重试")
         return
@@ -196,10 +229,67 @@ export default {
         this.yamlLoading = false
         this.yamlValue = response.data
         this.yamlName = name
+        this.yamlNamespace = namespace
       }).catch(() => {
         this.yamlLoading = false
       })
-    }
+    },
+    updatePvc: function() {
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if (!this.yamlNamespace) {
+        Message.error("获取命名空间参数异常，请刷新重试")
+        return
+      }
+      if (!this.yamlName) {
+        Message.error("获取存储声明参数异常，请刷新重试")
+        return
+      }
+      updatePersistentVolumeClaim(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(() => {
+        Message.success("更新成功")
+      }).catch(() => {
+        // console.log(e)
+      })
+    },
+    deletePvcs: function(pvcs) {
+      const cluster = this.$store.state.cluster
+      if (!cluster) {
+        Message.error("获取集群参数异常，请刷新重试")
+        return
+      }
+      if ( pvcs.length <= 0 ){
+        Message.error("请选择要删除的存储声明")
+        return
+      }
+      let params = {
+        resources: pvcs
+      }
+      deletePersistentVolumeClaims(cluster, params).then(() => {
+        Message.success("删除成功")
+      }).catch(() => {
+        // console.log(e)
+      })
+    },
+    _delPvcsFunc: function() {
+      if (this.delPvcs.length > 0){
+        let delPvcs = []
+        for (var p of this.delPvcs) {
+          delPvcs.push({namespace: p.namespace, name: p.name})
+        }
+        this.deletePvcs(delPvcs)
+      }
+    },
+    handleSelectionChange(val) {
+      this.delPvcs = val;
+      if (val.length > 0){
+        this.delFunc = this._delPvcsFunc
+      } else {
+        this.delFunc = undefined
+      }
+    },
   }
 }
 </script>

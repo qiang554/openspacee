@@ -66,9 +66,8 @@ func (s *StorageClass) updateYaml(c *views.Context) *utils.Response {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{
-		"name":      c.Param("name"),
-		"namespace": c.Param("namespace"),
-		"yaml":      ser.Yaml,
+		"name": c.Param("name"),
+		"yaml": ser.Yaml,
 	}
 	return s.StorageClass.UpdateYaml(c.Param("cluster"), reqParams)
 }

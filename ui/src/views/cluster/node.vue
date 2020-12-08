@@ -21,7 +21,7 @@
           min-width="20"
           show-overflow-tooltip>
           <template slot-scope="scope">
-            <span class="name-class" v-on:click="nameClick(scope.row.namespace, scope.row.name)">
+            <span class="name-class" v-on:click="nameClick(scope.row.name)">
               {{ scope.row.name }}
             </span>
           </template>
@@ -76,11 +76,11 @@
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="nameClick(scope.row.namespace, scope.row.name)">
+                <el-dropdown-item @click.native.prevent="nameClick(scope.row.name)">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                   <span style="margin-left: 5px;">详情</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="getNodeYaml(scope.row.namespace, scope.row.name)">
+                <el-dropdown-item @click.native.prevent="getNodeYaml(scope.row.name)">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="edit" />
                   <span style="margin-left: 5px;">修改</span>
                 </el-dropdown-item>
@@ -106,7 +106,7 @@
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listNodes } from '@/api/nodes'
+import { listNodes, getNode, buildNode } from '@/api/nodes'
 import { Message } from 'element-ui'
 import { Yaml } from '@/views/components'
 
@@ -119,7 +119,6 @@ export default {
   data() {
       return {
         yamlDialog: false,
-        yamlNamespace: "",
         yamlName: "",
         yamlValue: "",
         yamlLoading: true,
@@ -153,13 +152,13 @@ export default {
         let newUid = newObj.resource.metadata.uid
         let newRv = newObj.resource.metadata.resourceVersion
         if (newObj.event === 'add') {
-          this.originNodes.push(this.buildNodes(newObj.resource))
+          this.originNodes.push(buildNode(newObj.resource))
         } else if (newObj.event === 'update') {
           for (let i in this.originNodes) {
             let d = this.originNodes[i]
             if (d.uid === newUid) {
               if (d.resource_version < newRv){
-                let newDp = this.buildNodes(newObj.resource)
+                let newDp = buildNode(newObj.resource)
                 this.$set(this.originNodes, i, newDp)
               }
               break
@@ -224,11 +223,10 @@ export default {
       }
       return p
     },
-    nameClick: function(namespace, name) {
-      this.$router.push({name: 'nodeDetail', params: {namespace: namespace, nodeName: name}})
+    nameClick: function(name) {
+      this.$router.push({name: 'nodeDetail', params: {nodeName: name}})
     },
     getNodeYaml: function(name) {
-      this.yamlNamespace = ""
       this.yamlName = ""
       const cluster = this.$store.state.cluster
       if (!cluster) {
@@ -242,10 +240,9 @@ export default {
       this.yamlValue = ""
       this.yamlDialog = true
       this.yamlLoading = true
-      getNode(cluster, namespace, name, "yaml").then(response => {
+      getNode(cluster, name, "yaml").then(response => {
         this.yamlLoading = false
         this.yamlValue = response.data
-        this.yamlNamespace = namespace
         this.yamlName = name
       }).catch(() => {
         this.yamlLoading = false
@@ -307,19 +304,6 @@ export default {
       } else {
         this.delFunc = undefined
       }
-    },
-    getPortsDisplay(ports) {
-      if (!ports) return ''
-      var pd = []
-      for (let p of ports) {
-        var pds = p.port
-        if (p.nodePort) {
-          pds += ':' + p.nodePort
-        }
-        pds += '/' + p.protocol
-        pd.push(pds)
-      }
-      return pd.join(',')
     }
   }
 }

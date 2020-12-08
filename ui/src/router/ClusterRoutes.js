@@ -18,6 +18,14 @@ const Routes = [
   },
 
   {
+    path: 'node/:nodeName',
+    name: 'nodeDetail',
+    hidden: true,
+    component: () => import('@/views/cluster/nodeDetail'),
+    meta: { title: '节点', icon: 'node', group: 'cluster', sideName: 'node' },
+  },
+
+  {
     path: 'workloads',
     component: Noop,
     name: 'workloads',

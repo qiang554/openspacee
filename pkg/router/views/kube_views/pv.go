@@ -33,8 +33,7 @@ func (pv *PV) list(c *views.Context) *utils.Response {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{
-		"name":      ser.Name,
-		"namespace": ser.Namespace,
+		"name": ser.Name,
 	}
 	return pv.PV.List(c.Param("cluster"), reqParams)
 }
@@ -45,9 +44,8 @@ func (pv *PV) get(c *views.Context) *utils.Response {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{
-		"name":      c.Param("name"),
-		"namespace": c.Param("namespace"),
-		"output":    ser.Output,
+		"name":   c.Param("name"),
+		"output": ser.Output,
 	}
 	return pv.PV.Get(c.Param("cluster"), reqParams)
 }
@@ -66,9 +64,8 @@ func (pv *PV) updateYaml(c *views.Context) *utils.Response {
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
 	reqParams := map[string]interface{}{
-		"name":      c.Param("name"),
-		"namespace": c.Param("namespace"),
-		"yaml":      ser.Yaml,
+		"name": c.Param("name"),
+		"yaml": ser.Yaml,
 	}
 	return pv.PV.UpdateYaml(c.Param("cluster"), reqParams)
 }
