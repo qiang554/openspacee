@@ -2,45 +2,43 @@
   <div>
     <clusterbar :titleName="titleName" :delFunc="deleteDaemonSets" :editFunc="getDaemonSetYaml"/>
     <div class="dashboard-container">
-      <!-- <div class="dashboard-text"></div> -->
+      <el-form label-position="left" inline class="pod-item">
+        <el-form-item label="名称">
+          <span>{{ daemonset.name }}</span>
+        </el-form-item>
+        <el-form-item label="创建时间">
+          <span>{{ daemonset.created }}</span>
+        </el-form-item>
+        <el-form-item label="命名空间">
+          <span>{{ daemonset.namespace }}</span>
+        </el-form-item>
+        <el-form-item label="更新策略">
+          <span>{{ daemonset.strategy }}</span>
+        </el-form-item>
+        <el-form-item label="Pod副本">
+          <span>{{ daemonset.number_ready + "/" + daemonset.desired_number_scheduled }}</span>
+        </el-form-item>
+        <el-form-item label="选择器">
+          <span v-if="!daemonset.label_selector">—</span>
+          <template v-else v-for="(val, key) in daemonset.label_selector.matchLabels">
+            <span :key="key">{{key}}: {{val}}<br/></span>
+          </template>
+        </el-form-item>
+        <el-form-item label="标签">
+          <span v-if="!daemonset.labels">—</span>
+          <template v-else v-for="(val, key) in daemonset.labels">
+            <span :key="key">{{key}}: {{val}}<br/></span>
+          </template>
+        </el-form-item>
+        <!-- <el-form-item label="注解">
+          <span v-if="!daemonset.annotations">—</span>
+          
+          <template v-else v-for="(val, key) in daemonset.annotations">
+            <span :key="key">{{key}}: {{val}}<br/></span>
+          </template>
+        </el-form-item> -->
+      </el-form>
       
-
-          <el-form label-position="left" inline class="pod-item">
-            <el-form-item label="名称">
-              <span>{{ daemonset.name }}</span>
-            </el-form-item>
-            <el-form-item label="创建时间">
-              <span>{{ daemonset.created }}</span>
-            </el-form-item>
-            <el-form-item label="命名空间">
-              <span>{{ daemonset.namespace }}</span>
-            </el-form-item>
-            <el-form-item label="更新策略">
-              <span>{{ daemonset.strategy }}</span>
-            </el-form-item>
-            <el-form-item label="Pod副本">
-              <span>{{ daemonset.number_ready + "/" + daemonset.desired_number_scheduled }}</span>
-            </el-form-item>
-            <el-form-item label="选择器">
-              <span v-if="!daemonset.label_selector">—</span>
-              <template v-else v-for="(val, key) in daemonset.label_selector.matchLabels">
-                <span :key="key">{{key}}: {{val}}<br/></span>
-              </template>
-            </el-form-item>
-            <el-form-item label="标签">
-              <span v-if="!daemonset.labels">—</span>
-              <template v-else v-for="(val, key) in daemonset.labels">
-                <span :key="key">{{key}}: {{val}}<br/></span>
-              </template>
-            </el-form-item>
-            <!-- <el-form-item label="注解">
-              <span v-if="!daemonset.annotations">—</span>
-              
-              <template v-else v-for="(val, key) in daemonset.annotations">
-                <span :key="key">{{key}}: {{val}}<br/></span>
-              </template>
-            </el-form-item> -->
-          </el-form>
       <div style="padding: 0px 8px;">
         <div>Pods</div>
         <div class="msgClass" style="margin: 15px 10px 30px 10px;">
@@ -169,7 +167,7 @@
         </div>
       </div>
       <el-tabs value="containers" style="padding: 0px 8px;">
-        <el-tab-pane label="容器组" name="containers">
+        <el-tab-pane label="容器" name="containers">
           <div class="msgClass">
             <el-table
             ref="table"
@@ -287,22 +285,25 @@
             </el-table>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="挂载存储" name="volumes">
+        <el-tab-pane label="存储" name="volumes">
           <div class="msgClass" style="padding: 10px 0px;">
-          <div v-for="v in daemonset.volumes" :key="v.name" style="margin: 15px 25px; font-size: 14px; color: #606266">
-            <div style="margin-bottom: 6px;"><b>{{v.name}}</b></div>
-            <template v-for="(val, key) in v">
-                <span v-if="key !== 'name'" :key="key"> 
-                  <span class="back-class">{{key}}</span>
-                  <span v-for="(ival, ikey) in val" :key="ikey" class="back-class">
-                    {{ikey}}: {{ival}}
-                  </span>
-                </span>
-              </template>
-          </div>
+            <template v-if="daemonset.volumes && daemonset.volumes.length > 0">
+              <div v-for="v in daemonset.volumes" :key="v.name" style="margin: 15px 25px; font-size: 14px; color: #606266">
+                <div style="margin-bottom: 6px;"><b>{{v.name}}</b></div>
+                <template v-for="(val, key) in v">
+                    <span v-if="key !== 'name'" :key="key"> 
+                      <span class="back-class">{{key}}</span>
+                      <span v-for="(ival, ikey) in val" :key="ikey" class="back-class">
+                        {{ikey}}: {{ival}}
+                      </span>
+                    </span>
+                  </template>
+              </div>
+            </template>
+            <div v-else style="padding: 25px 15px ;color: #909399; text-align: center">无挂载存储</div>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="条件状态" name="conditions">
+        <el-tab-pane label="状态" name="conditions">
           <div class="msgClass">
             <el-table
               v-if="daemonset && daemonset.conditions && daemonset.conditions.length > 0"

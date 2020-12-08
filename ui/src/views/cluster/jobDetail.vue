@@ -176,7 +176,7 @@
         </div>
       </div>
       <el-tabs value="containers" style="padding: 0px 8px;">
-        <el-tab-pane label="容器组" name="containers">
+        <el-tab-pane label="容器" name="containers">
           <div class="msgClass">
             <el-table
             ref="table"
@@ -294,9 +294,9 @@
             </el-table>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="挂载存储" name="volumes">
+        <el-tab-pane label="存储" name="volumes">
           <div class="msgClass" style="padding: 10px 0px;">
-            <template v-if="job.volumes">
+            <template v-if="job.volumes && job.volumes.length > 0">
               <div v-for="v in job.volumes" :key="v.name" style="margin: 15px 25px; font-size: 14px; color: #606266">
                 <div style="margin-bottom: 6px;"><b>{{v.name}}</b></div>
                 <template v-for="(val, key) in v">
@@ -309,10 +309,10 @@
                 </template>
               </div>
             </template>
-            <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">无挂载外部存储</div>
+            <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">无挂载存储</div>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="条件状态" name="conditions">
+        <el-tab-pane label="状态" name="conditions">
           <div class="msgClass">
             <el-table
               v-if="job && job.conditions && job.conditions.length > 0"

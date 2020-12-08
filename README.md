@@ -5,7 +5,7 @@ OpenSpace是一个用来管理多Kubernetes集群的开源项目。OpenSpace可�
 ### 快速开始
 
 ```
-sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace openspacee/osp
+sudo docker run -d --restart=unless-stopped -p 443:443 -v /root/data:/var/lib/redis --name openspace openspacee/osp
 ```
 
 启动之后，在浏览器打开：https://${ip}，请将ip替换为启动服务所在服务器ip地址。
@@ -26,13 +26,13 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 集群添加之后，会提示将Kubernetes集群导入连接到OpenSpace系统。
 
-![image-20201121205832524](docs/images/connect_cluster.png)
+![image-20201208175010107](docs/images/connect-cluster.png)
 
 #### 3. 导入集群
 
 在Kubernetes集群中使用上述的kubectl命令部署ospagent服务，将集群连接导入到OpenSpace系统。
 
-![image-20201121210655368](docs/images/kubectl_ospagent.png)
+![image-20201208175404479](docs/images/kubectl-ospagent.png)
 
 等待几分钟后，查看ospagent服务是否启动。
 
@@ -52,9 +52,7 @@ sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --name openspace
 
 ![image-20201122110225534](docs/images/architecture.png)
 
-### 部署方式
 
-#### 1. K8s集群内部署
 
 ### 后续功能
 

@@ -72,15 +72,15 @@
     <el-dialog title="集群导入" :visible.sync="clusterConnectDialog" :close-on-click-modal="false">
       <div style="font-size: 15px;">请在现有Kubernetes集群上运行下面的kubeclt命令，以连接OpenSpace平台：</div>
       <div style="margin-top: 15px;">
-        <el-tag type="info" style="font-size: 14px; border-radius: 4px 0px 0px 4px; border-right-width: 0px;">
+        <el-tag type="info" style="font-size: 14px; border-radius: 4px;">
           {{ copyCluster }}
         </el-tag>
         <!-- <el-tag type="" style="font-size: 14px; border-radius: 0px 4px 4px 0px;">复制</el-tag> -->
-        <el-button plain size="small" slot="append" 
+        <!-- <el-button plain size="small" slot="append" 
             style="height: 32px; border-radius: 0px 4px 4px 0px; padding: 10px 8px;"
             v-clipboard:copy="copyCluster" v-clipboard:success="onCopy" v-clipboard:error="onError">
             复制
-        </el-button>
+        </el-button> -->
       </div>
       <div style="font-size: 13px; margin-top: 8px; color: #e6a23c;">
         *注意：请将上述访问地址{{this.locationAddr}}换为Kubernetes集群可以访问的地址。

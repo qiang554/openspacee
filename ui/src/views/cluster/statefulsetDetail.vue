@@ -2,45 +2,43 @@
   <div>
     <clusterbar :titleName="titleName" :delFunc="deleteStatefulSets" :editFunc="getStatefulSetYaml"/>
     <div class="dashboard-container">
-      <!-- <div class="dashboard-text"></div> -->
-      
+      <el-form label-position="left" inline class="pod-item">
+        <el-form-item label="名称">
+          <span>{{ statefulset.name }}</span>
+        </el-form-item>
+        <el-form-item label="创建时间">
+          <span>{{ statefulset.created }}</span>
+        </el-form-item>
+        <el-form-item label="命名空间">
+          <span>{{ statefulset.namespace }}</span>
+        </el-form-item>
+        <el-form-item label="更新策略">
+          <span>{{ statefulset.strategy }}</span>
+        </el-form-item>
+        <el-form-item label="Pod副本">
+          <span>{{ statefulset.ready_replicas + "/" + statefulset.status_replicas }}</span>
+        </el-form-item>
+        <el-form-item label="选择器">
+          <span v-if="!statefulset.label_selector">—</span>
+          <template v-else v-for="(val, key) in statefulset.label_selector.matchLabels">
+            <span :key="key">{{key}}: {{val}}<br/></span>
+          </template>
+        </el-form-item>
+        <el-form-item label="标签">
+          <span v-if="!statefulset.labels">—</span>
+          <template v-else v-for="(val, key) in statefulset.labels">
+            <span :key="key">{{key}}: {{val}}<br/></span>
+          </template>
+        </el-form-item>
+        <!-- <el-form-item label="注解">
+          <span v-if="!statefulset.annotations">—</span>
+          
+          <template v-else v-for="(val, key) in statefulset.annotations">
+            <span :key="key">{{key}}: {{val}}<br/></span>
+          </template>
+        </el-form-item> -->
+      </el-form>
 
-          <el-form label-position="left" inline class="pod-item">
-            <el-form-item label="名称">
-              <span>{{ statefulset.name }}</span>
-            </el-form-item>
-            <el-form-item label="创建时间">
-              <span>{{ statefulset.created }}</span>
-            </el-form-item>
-            <el-form-item label="命名空间">
-              <span>{{ statefulset.namespace }}</span>
-            </el-form-item>
-            <el-form-item label="更新策略">
-              <span>{{ statefulset.strategy }}</span>
-            </el-form-item>
-            <el-form-item label="Pod副本">
-              <span>{{ statefulset.ready_replicas + "/" + statefulset.status_replicas }}</span>
-            </el-form-item>
-            <el-form-item label="选择器">
-              <span v-if="!statefulset.label_selector">—</span>
-              <template v-else v-for="(val, key) in statefulset.label_selector.matchLabels">
-                <span :key="key">{{key}}: {{val}}<br/></span>
-              </template>
-            </el-form-item>
-            <el-form-item label="标签">
-              <span v-if="!statefulset.labels">—</span>
-              <template v-else v-for="(val, key) in statefulset.labels">
-                <span :key="key">{{key}}: {{val}}<br/></span>
-              </template>
-            </el-form-item>
-            <!-- <el-form-item label="注解">
-              <span v-if="!statefulset.annotations">—</span>
-              
-              <template v-else v-for="(val, key) in statefulset.annotations">
-                <span :key="key">{{key}}: {{val}}<br/></span>
-              </template>
-            </el-form-item> -->
-          </el-form>
       <div style="padding: 0px 8px;">
         <div>Pods</div>
         <div class="msgClass" style="margin: 15px 10px 30px 10px;">
@@ -169,7 +167,7 @@
         </div>
       </div>
       <el-tabs value="containers" style="padding: 0px 8px;">
-        <el-tab-pane label="容器组" name="containers">
+        <el-tab-pane label="容器" name="containers">
           <div class="msgClass">
             <el-table
             ref="table"
@@ -287,7 +285,7 @@
             </el-table>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="挂载存储" name="volumes">
+        <el-tab-pane label="存储" name="volumes">
           <div class="msgClass" style="padding: 10px 0px;">
           <div v-for="v in statefulset.volumes" :key="v.name" style="margin: 15px 25px; font-size: 14px; color: #606266">
             <div style="margin-bottom: 6px;"><b>{{v.name}}</b></div>
@@ -302,7 +300,7 @@
           </div>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="条件状态" name="conditions">
+        <el-tab-pane label="状态" name="conditions">
           <div class="msgClass">
             <el-table
               v-if="statefulset && statefulset.conditions && statefulset.conditions.length > 0"
