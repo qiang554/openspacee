@@ -26,11 +26,6 @@
         </el-form-item>
       </el-form>
 
-      <el-collapse class="podCollapse" :value="['events']">
-        <el-collapse-item title="Events" name="events">
-          <template slot="title">
-            <span class="title-class">Events</span>
-          </template>
           <div class="msgClass">
             <el-table
               v-if="hpaEvents && hpaEvents.length > 0"
@@ -90,8 +85,6 @@
             </el-table>
             <div v-else style="color: #909399; text-align: center">暂无数据</div>
           </div>
-        </el-collapse-item>
-      </el-collapse>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>

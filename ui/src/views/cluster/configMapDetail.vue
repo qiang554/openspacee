@@ -2,7 +2,7 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getConfigMapYaml" />
     <div class="dashboard-container">
-      <el-form label-position="left" inline class="pod-item" v-if="configMap.metadata">
+      <el-form label-position="left" class="pod-item" v-if="configMap.metadata">
         <el-form-item label="名称">
           <span>{{ configMap.metadata.name }}</span>
         </el-form-item>
@@ -14,49 +14,45 @@
         </el-form-item>
       </el-form>
 
-      <el-tabs value="config" style="padding: 0px 8px;">
-        <el-tab-pane label="配置项" name="config">
-          <div class="msgClass">
-            <el-table
-              v-if="configData"
-              :data="configData"
-              class="table-fix"
-              tooltip-effect="dark"
-              style="width: 100%"
-              :cell-style="cellStyle"
-              :default-sort = "{prop: 'lastProbeTime'}"
-              >
-              <el-table-column
-                prop="key"
-                label="键"
-                min-width="30"
-                show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column
-                prop="value"
-                label="值"
-                min-width="80"
-                show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column label="操作" min-width="30" fixed="right">
-                <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    @click="handleEdit(scope.$index, scope.row)">复制</el-button>
-                  <el-button
-                    size="mini"
-                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                  <el-button
-                    size="mini"
-                    type="danger"
-                    @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-            <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无数据</div>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
+      <div class="msgClass">
+        <el-table
+          v-if="configData"
+          :data="configData"
+          class="table-fix"
+          tooltip-effect="dark"
+          style="width: 100%"
+          :cell-style="cellStyle"
+          :default-sort = "{prop: 'lastProbeTime'}"
+          >
+          <el-table-column
+            prop="key"
+            label="键"
+            min-width="30"
+            show-overflow-tooltip>
+            <template slot-scope={row}>
+              <el-input placeholder="请输入内容" v-model="row.key"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="value"
+            label="值"
+            min-width="80"
+            show-overflow-tooltip>
+            <template slot-scope={row}>
+              <el-input placeholder="请输入内容" v-model="row.value"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" min-width="20" fixed="right" align="center">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="danger"
+                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无数据</div>
+      </div>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -145,6 +141,12 @@ export default {
     handleChange(val) {
         console.log(val);
     },
+    addConfigMap: function() {
+        this.configData.push({
+          key: "",
+          value: ""
+        })
+    },
     fetchData: function() {
       this.originConfigMap = {}
       this.loading = true
@@ -225,7 +227,9 @@ export default {
       }
       console.log(this.yamlValue)
       updateConfigMap(cluster, this.configMap.metadata.namespace, this.configMap.metadata.name, this.yamlValue).then(() => {
+        this.yamlDialog = false
         Message.success("更新成功")
+        this.fetchData()
       }).catch(() => {
         // console.log(e) 
       })

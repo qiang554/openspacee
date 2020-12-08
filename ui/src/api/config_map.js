@@ -17,7 +17,7 @@ export function getConfigMap(cluster, namespace, name, output='') {
 
 export function updateConfigMap(cluster, namespace, name, yaml) {
   return request({
-    url: `configmap/${cluster}/update_config_map`,
+    url: `configmap/${cluster}/update/${namespace}/${name}`,
     method: 'post',
     data: { yaml, name, namespace }
   })

@@ -9,6 +9,8 @@
     <!-- <svg-icon class="icon-create" icon-class="edit"/> -->
     <el-link v-if="typeof editFunc !== 'undefined'" class="icon-create" @click="editFunc()"><svg-icon icon-class="edit"/></el-link>
     <el-link v-if="typeof delFunc !== 'undefined'" class="icon-create" @click="delFunc()"><svg-icon icon-class="delete"/></el-link>
+    <el-link v-if="typeof addFunc !== 'undefined'" class="icon-create" @click="addFunc()"><svg-icon icon-class="add"/></el-link>
+    <el-link v-if="typeof saveFunc !== 'undefined'" class="icon-create" @click="saveFunc()"><svg-icon icon-class="save"/></el-link>
 
     <div class="right">
       <!-- <el-button v-if="typeof delFunc !== 'undefined'"  size="small" plain @click="delFunc()">删 除</el-button> -->
@@ -57,6 +59,16 @@ export default {
       default: undefined
     },
     delFunc: {
+      type: Function,
+      required: false,
+      default: undefined,
+    },
+    addFunc: {
+      type: Function,
+      required: false,
+      default: undefined,
+    },
+    saveFunc: {
       type: Function,
       required: false,
       default: undefined,

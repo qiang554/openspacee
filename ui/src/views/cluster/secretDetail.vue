@@ -31,17 +31,21 @@
         </el-form-item>
       </el-form>
 
-      <el-collapse v-model="activeNames" @change="handleChange">
-        <el-collapse-item title="Data" name="1" v-if="secret.data">
-          <div v-for="(key, val) in secret.data" :key="val" >
-            <span >{{val}}</span>
+      <!-- <el-collapse v-model="activeNames" @change="handleChange">
+        <el-collapse-item title="Data" name="1" v-if="secret.data"> -->
+          <div v-for="(key, val) in secret.data" :key="val" class="msgClass" >
+            <div class="dataDiv">
+              <div>{{val}}
+                <el-button type="text" icon="el-icon-view" circle size="mini" @click.once="getSecretDisplay(key,val)"></el-button>
+              </div>
+            </div>
             <el-input type="textarea"  :autosize='{ minRows: 2, maxRows: 4 }' readonly v-model="secret.data[val]">
               <i slot="suffix" class="el-input__icon el-icon-date"></i>
             </el-input>
           </div>
-        </el-collapse-item>
+        <!-- </el-collapse-item>
 
-      </el-collapse>
+      </el-collapse> -->
 
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
@@ -59,6 +63,8 @@
 import { Clusterbar, Yaml } from '@/views/components'
 import { getSecret } from '@/api/secret'
 import { Message } from 'element-ui'
+
+let Base64 = require('js-base64').Base64
 
 export default {
   name: 'SecretDetail',
@@ -101,6 +107,10 @@ export default {
     }
   },
   methods: {
+    getSecretDisplay(key,val) {
+      var res = Base64.decode(key)
+      this.secret.data[val] = res
+    },
     handleChange(val) {
         console.log(val);
     },
@@ -258,5 +268,12 @@ export default {
 }
 .msgClass .el-table::before {
   height: 0px;
+}
+.msgClass {
+  margin: 8px 10px 15px 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+.dataDiv {
+  padding: 5px;
 }
 </style>
