@@ -69,7 +69,7 @@ sudo docker run -d --restart=unless-stopped -p 443:443 -v /root/data:/var/lib/re
 
 欢迎随时跟我们交流，可以使用QQ扫描下面二维码，加入我们的QQ交流群。
 
-
+![OpenSpace容器平台群二维码](docs/images/OpenSpace容器平台群二维码.png)
 
 最后，不要忘了点个star，支持一下😊！
 
