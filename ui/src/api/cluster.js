@@ -29,3 +29,11 @@ export function deleteCluster(clusters) {
     data: clusters,
   })
 }
+
+export function applyYaml(cluster, yaml) {
+  return request({
+    url: `/cluster/apply/${cluster}`,
+    method: 'post',
+    data: {yaml: yaml},
+  })
+}

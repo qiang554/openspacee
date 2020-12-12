@@ -4,6 +4,8 @@
     <navbar-item />
 
     <div class="right-menu">
+       <el-button v-if="importYaml" plain size="small" @click="openYamlDialog"
+        style="margin-right: 25px; padding: 8px 10px;">导入YAML</el-button>
       <el-dropdown placement="bottom">
         <span class="el-dropdown-link">
           <img class="avatar-class" src="@/assets/user.png" />
@@ -21,20 +23,49 @@
 import { mapGetters } from 'vuex'
 import Logo from './Logo'
 import NavbarItem from './NavbarItem'
+// import { Yaml } from '@/views/components'
 
 export default {
-  components: { Logo, NavbarItem },
+  components: { Logo, NavbarItem,  },
+  props: ['nav',],
+  data() {
+    return {
+      importYaml: false
+    }
+  },
+
+  watch: {
+    cluster: function (newObj) {
+      console.log(newObj)
+      if(newObj) {
+        this.importYaml = true
+      } else {
+        this.importYaml = false
+      }
+    }
+  },
 
   computed: {
     ...mapGetters([
       'username',
-    ])
+    ]),
+    cluster: function() {
+      return this.$store.state.cluster
+    }
   },
   methods: {
     async logout() {
       await this.$store.dispatch('user/logout')
       parent.location.href = `/ui/login?redirect=${this.$route.fullPath}`
-    }
+    },
+    openYamlDialog: function() {
+      // this.yamlValue = "asdfwe"
+      // this.yamlDialog = true;
+      // this.yamlLoading = false;
+      // this.value = true;
+      this.nav.yamlValue = '';
+      this.nav.dialog = true;
+    },
   }
 }
 </script>

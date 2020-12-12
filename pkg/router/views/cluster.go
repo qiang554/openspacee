@@ -27,6 +27,7 @@ func NewCluster(models *model.Models, kr *kube_resource.KubeResources) *Cluster 
 		NewView(http.MethodPost, "", cluster.create),
 		NewView(http.MethodGet, "/:cluster/detail", cluster.detail),
 		NewView(http.MethodPost, "/delete", cluster.delete),
+		NewView(http.MethodPost, "/apply/:cluster", cluster.apply),
 	}
 	cluster.Views = views
 	return cluster
@@ -100,6 +101,16 @@ func (clu *Cluster) create(c *Context) *utils.Response {
 
 func (clu *Cluster) detail(c *Context) *utils.Response {
 	return clu.Cluster.Get(c.Param("cluster"), map[string]interface{}{})
+}
+
+func (clu *Cluster) apply(c *Context) *utils.Response {
+	var ser ApplyYamlSerializers
+	//klog.Info(c.Request.Body)
+	if err := c.ShouldBind(&ser); err != nil {
+		klog.Errorf("bind params error: %s", err.Error())
+		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
+	}
+	return clu.Cluster.Apply(c.Param("cluster"), ser)
 }
 
 func (clu *Cluster) delete(c *Context) *utils.Response {

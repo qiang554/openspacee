@@ -24,3 +24,7 @@ type DeleteClusterSerializers struct {
 type DeleteUserSerializers struct {
 	Name string `json:"name"`
 }
+
+type ApplyYamlSerializers struct {
+	YamlStr string `json:"yaml"`
+}

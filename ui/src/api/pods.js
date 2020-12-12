@@ -105,7 +105,7 @@ export function buildPods(pod) {
   }
   let controlled = ''
   let controlled_name = ''
-  if (pod.metadata.ownerReferences.length > 0) {
+  if (pod.metadata.ownerReferences && pod.metadata.ownerReferences.length > 0) {
     controlled = pod.metadata.ownerReferences[0].kind
     controlled_name = pod.metadata.ownerReferences[0].name
   }
