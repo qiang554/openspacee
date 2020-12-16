@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/openspacee/osp/pkg/model/types"
@@ -9,16 +8,12 @@ import (
 )
 
 type ClusterManager struct {
-	CommonManager
+	*CommonManager
 }
 
 func NewClusterManager(redisClient *redis.Client) *ClusterManager {
 	return &ClusterManager{
-		CommonManager{
-			client:   redisClient,
-			modelKey: "osp:cluster",
-			Context:  context.Background(),
-		},
+		CommonManager: NewCommonManager(redisClient, "osp:cluster", true),
 	}
 }
 
@@ -28,6 +23,22 @@ func (clu *ClusterManager) Create(cluster *types.Cluster) error {
 	}
 
 	return nil
+}
+
+func (clu *ClusterManager) Update(cluster *types.Cluster) error {
+	if err := clu.CommonManager.Update(cluster.Name, cluster, -1, true); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (clu *ClusterManager) Get(name string) (*types.Cluster, error) {
+	clusterObj := types.Cluster{}
+	if err := clu.CommonManager.Get(name, &clusterObj); err != nil {
+		return nil, err
+	}
+	return &clusterObj, nil
 }
 
 func (clu *ClusterManager) List(filters map[string]interface{}) ([]*types.Cluster, error) {

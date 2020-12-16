@@ -462,6 +462,9 @@ export default {
         // console.log(e)
       })
     },
+    namePodClick: function(namespace, name) {
+      this.$router.push({name: 'podsDetail', params: {namespace: namespace, podName: name}})
+    },
   }
 }
 </script>

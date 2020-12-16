@@ -38,6 +38,7 @@
 // import { mapGetters } from 'vuex'
 import { listNamespace } from '@/api/namespace'
 import { Message } from 'element-ui'
+import storage from '@/utils/storage'
 
 let nameTimer
 export default {
@@ -101,10 +102,23 @@ export default {
       this.fetchNamespace()
     }
   },
+  computed: {
+    cluster: function() {
+      return this.$store.state.cluster
+    },
+    nsKey: function() {
+      return 'namespace-' + this.cluster
+    }
+  },
   methods: {
     nsChange(vals) {
       if (this.nsFunc) {
         this.nsFunc(vals)
+      }
+      if(vals && vals.length > 0) {
+        storage.set(this.nsKey, vals)
+      } else {
+        storage.remove(this.nsKey)
       }
     },
     nameDebounce: function() {
@@ -126,7 +140,18 @@ export default {
         listNamespace(cluster).then(response => {
           this.namespaces = response.data
           this.namespaces.sort((a, b) => {return a.name > b.name ? 1 : -1})
-        }).catch(() => {
+          let nsCache = storage.get(this.nsKey)
+          if (nsCache) {
+            var nsNames = []
+            for(let n of this.namespaces) nsNames.push(n.name)
+            let nsInput = nsCache.filter((name) => {return nsNames.indexOf(name) > -1})
+            this.nsInput = nsInput
+            if (this.nsFunc) {
+              this.nsFunc(this.nsInput)
+            }
+          }
+        }).catch((err) => {
+          console.log(err)
         })
       } else {
         Message.error("获取集群异常，请刷新重试")

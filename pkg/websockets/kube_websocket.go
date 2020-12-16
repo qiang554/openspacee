@@ -3,6 +3,8 @@ package websockets
 import (
 	"github.com/gorilla/websocket"
 	"github.com/openspacee/osp/pkg/kube_resource"
+	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	"k8s.io/klog"
 )
@@ -13,9 +15,10 @@ type KubeWebsocket struct {
 	cluster       string
 	wsConn        *websocket.Conn
 	stopped       bool
+	models        *model.Models
 }
 
-func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options) *KubeWebsocket {
+func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options, models *model.Models) *KubeWebsocket {
 	middleMsg := kube_resource.NewMiddleMessage(redisOp)
 	return &KubeWebsocket{
 		cluster:       cluster,
@@ -23,6 +26,7 @@ func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options
 		middleMessage: middleMsg,
 		wsConn:        ws,
 		stopped:       false,
+		models:        models,
 	}
 }
 
@@ -51,7 +55,7 @@ func (k *KubeWebsocket) WsReceiveMsg() {
 			klog.Error("read err:", err)
 			break
 		}
-		klog.Infof("read data: %s", string(data))
+		klog.V(1).Infof("read data: %s", string(data))
 		midResp, err := kube_resource.UnserialzerMiddleResponse(string(data))
 		if err != nil {
 			klog.Errorf("unserializer data error: %s", err.Error())
@@ -71,6 +75,13 @@ func (k *KubeWebsocket) WsReceiveMsg() {
 
 func (k *KubeWebsocket) Clean() {
 	klog.Infof("start clean cluster %s websocket", k.cluster)
+	clusterObj, err := k.models.ClusterManager.Get(k.cluster)
+	if err != nil {
+		klog.Errorf("get cluster %s object error: %s", k.cluster, err.Error())
+	} else {
+		clusterObj.Status = types.ClusterPending
+		k.models.ClusterManager.Update(clusterObj)
+	}
 	k.middleMessage.Close()
 	k.stopped = true
 	k.wsConn.Close()

@@ -24,6 +24,9 @@ const getters = {
   //     return state.clusterWatch
   //   }
   // },
+  globalClusterWatch: ( _, getters ) => {
+    return getters.resourceWatch("osp:cluster")
+  },
   podWatch: ( _, getters ) => {
     return getters.resourceWatch("pods")
   },

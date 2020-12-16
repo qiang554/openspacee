@@ -28,6 +28,16 @@ func NewMiddleMessage(op *oredis.Options) *MiddleMessage {
 	}
 }
 
+func NewMiddleMessageWithClient(op *oredis.Options, client *redis.Client) *MiddleMessage {
+	var ctx = context.Background()
+
+	return &MiddleMessage{
+		options: op,
+		client:  client,
+		Context: ctx,
+	}
+}
+
 func (m *MiddleMessage) Close() {
 	m.client.Close()
 }
@@ -47,7 +57,7 @@ func (m *MiddleMessage) ReceiveRequest(cluster string, reqHandle func(*MiddleReq
 			klog.Errorf("receive message error: %s", err.Error())
 			return err
 		}
-		klog.Info(data.Payload)
+		klog.V(1).Info(data.Payload)
 		mr, err := UnserializerMiddleRequest(data.Payload)
 		if err != nil {
 			klog.Errorf("unserialzier request error: %s", err.Error())
@@ -89,7 +99,7 @@ func (m *MiddleMessage) SendRequest(request *MiddleRequest) *utils.Response {
 	}
 
 	resData, err := m.client.BLPop(m.Context, time.Duration(request.Timeout)*time.Second, request.RequestId).Result()
-	klog.Info(resData)
+	klog.V(1).Info(resData)
 	if len(resData) < 2 {
 		klog.Errorf("get cluster %s response empty", request.Cluster)
 		return &utils.Response{Code: code.RequestError, Msg: "request kubernetes agent timeout"}
@@ -111,6 +121,63 @@ func (m *MiddleMessage) SendResponse(midRes *MiddleResponse) {
 	pipeLine.LPush(m.Context, reqId, serData)
 	pipeLine.Expire(m.Context, reqId, time.Second*3)
 	pipeLine.Exec(m.Context)
+}
+
+func (m *MiddleMessage) GlobalWatchQueueKey() string {
+	return "osp:global_watch"
+}
+
+func (m *MiddleMessage) HasGlobalWatchReceive() bool {
+	watchKey := m.GlobalWatchQueueKey()
+	subNums, err := m.client.PubSubNumSub(m.Context, watchKey).Result()
+	if err != nil {
+		klog.Errorf("get pubsub %s error: %s", watchKey, err.Error())
+		return false
+	}
+	if num, ok := subNums[watchKey]; !ok || num <= 0 {
+		klog.Errorf("watch global %s is not in subscribe")
+		return false
+	}
+	return true
+}
+
+func (m *MiddleMessage) ReceiveGlobalWatch(reqHandle func(string)) error {
+	reqSubKey := m.GlobalWatchQueueKey()
+	pubsub := m.client.Subscribe(m.Context, reqSubKey)
+	defer pubsub.Close()
+	klog.Infof("start receive global pubsub message")
+	for {
+		data, err := pubsub.ReceiveMessage(m.Context)
+		if err != nil {
+			klog.Errorf("receive message error: %s", err.Error())
+			return err
+		}
+		klog.V(1).Info(data.Payload)
+		reqHandle(data.Payload)
+	}
+}
+
+func (m *MiddleMessage) SendGlobalWatch(data interface{}) {
+	watchPubKey := m.GlobalWatchQueueKey()
+	subNums, err := m.client.PubSubNumSub(m.Context, watchPubKey).Result()
+	if err != nil {
+		klog.Errorf("get pubsub %s error: %s", watchPubKey, err.Error())
+		return
+	}
+	if num, ok := subNums[watchPubKey]; !ok || num <= 0 {
+		klog.Errorf("watch global is not in subscribe")
+		return
+	}
+	respData, err := json.Marshal(data)
+	if err != nil {
+		klog.Errorf("watch response serializer error: %s", err.Error())
+		return
+	}
+	_, err = m.client.Publish(m.Context, watchPubKey, respData).Result()
+	if err != nil {
+		klog.Error("publish watch response error: %s", err.Error())
+		return
+	}
 }
 
 func (m *MiddleMessage) ClusterWatchQueueKey(cluster string) string {

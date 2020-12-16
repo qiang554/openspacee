@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	kubewebsocket "github.com/openspacee/osp/pkg/websockets"
 	"k8s.io/klog"
@@ -43,7 +44,9 @@ func (k *KubeWs) Connect(c *gin.Context) {
 		return
 	}
 	klog.Info(cluster.Name)
-	kubeWebsocket := kubewebsocket.NewKubeWebsocket(cluster.Name, ws, k.redisOptions)
+	kubeWebsocket := kubewebsocket.NewKubeWebsocket(cluster.Name, ws, k.redisOptions, k.models)
 	kubeWebsocket.Consume()
+	cluster.Status = types.ClusterConnect
+	k.models.ClusterManager.Update(cluster)
 	klog.Infof("cluster %s kube connect finish", cluster.Name)
 }

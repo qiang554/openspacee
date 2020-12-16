@@ -1,6 +1,6 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :nameFunc="nameSearch" :createFunc="createClusterDialog" createDisplay="创建集群"/>
+    <clusterbar :titleName="titleName" :nameFunc="nameSearch" :createFunc="createClusterDialog" createDisplay="添加集群"/>
     <div class="dashboard-container" ref="tableCot">
       <el-table
         :data="clusters"
@@ -27,6 +27,17 @@
           min-width="34%"
           show-overflow-tooltip
         >
+          <template slot-scope="scope">
+            <span :style="{'color': (scope.row.status === 'Connect' ? '#409EFF' : '#F56C6C')}">
+              {{scope.row.status}}
+              <template v-if="scope.row.status === 'Connect'">
+                <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="correct" />
+              </template>
+              <template v-else>
+                <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="wrong" />
+              </template>
+            </span>
+          </template>
         </el-table-column>
 
         <el-table-column label="" width="80">
@@ -102,6 +113,23 @@ export default {
   components: {
     Clusterbar
   },
+  data() {
+    return {
+      titleName: ["Clusters"],
+      search_name: '',
+      cellStyle: {border: 0},
+      maxHeight: window.innerHeight - 150,
+      loading: true,
+      clusters: [],
+      createClusterFormVisible: false,
+      clusterConnectDialog: false,
+      clusterConnectToken: '',
+      form: {
+        name: '',
+      },
+      locationAddr: window.location.origin,
+    }
+  },
   created() {
     this.fetchData()
   },
@@ -117,26 +145,32 @@ export default {
       })()
     }
   },
-  data() {
-    return {
-      titleName: ["Cluster"],
-      search_name: '',
-      cellStyle: {border: 0},
-      maxHeight: window.innerHeight - 150,
-      loading: true,
-      clusters: [],
-      createClusterFormVisible: false,
-      clusterConnectDialog: false,
-      clusterConnectToken: '',
-      form: {
-        name: '',
-      },
-      locationAddr: window.location.origin,
+  watch: {
+    clusterWatch: function (newObj) {
+      if (newObj) {
+        let newName = newObj.resource.name
+        if (newObj.event === 'add') {
+          this.clusters.push(newObj.resource)
+        } else if (newObj.event === 'update') {
+          for (let i in this.clusters) {
+            let d = this.clusters[i]
+            if (d.name === newName) {
+              this.$set(this.clusters, i, newObj.resource)
+              break
+            }
+          }
+        } else if (newObj.event === 'delete') {
+          this.clusters = this.clusters.filter(( { name } ) => name !== newName)
+        }
+      }
     }
   },
   computed: {
     copyCluster() {
-      return `curl -k ${ this.locationAddr }/v1/import/${ this.clusterConnectToken } | kubectl apply -f -`;
+      return `curl -sk ${ this.locationAddr }/v1/import/${ this.clusterConnectToken } | kubectl apply -f -`;
+    },
+    clusterWatch: function() {
+      return this.$store.getters["ws/globalClusterWatch"]
     }
   },
   methods: {

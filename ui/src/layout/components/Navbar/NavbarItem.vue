@@ -35,6 +35,26 @@ export default {
   created() {
     this.fetchClusters()
   },
+  watch: {
+    clusterWatch: function (newObj) {
+      if (newObj) {
+        let newName = newObj.resource.name
+        if (newObj.event === 'add') {
+          this.origin_clusters.push(newObj.resource)
+        } else if (newObj.event === 'update') {
+          for (let i in this.origin_clusters) {
+            let d = this.origin_clusters[i]
+            if (d.name === newName) {
+              this.$set(this.origin_clusters, i, newObj.resource)
+              break
+            }
+          }
+        } else if (newObj.event === 'delete') {
+          this.origin_clusters = this.origin_clusters.filter(( { name } ) => name !== newName)
+        }
+      }
+    }
+  },
   computed: {
     activeMenu() {
       const route = this.$route
@@ -57,6 +77,9 @@ export default {
         return -1;
       })
       return cs;
+    },
+    clusterWatch: function() {
+      return this.$store.getters["ws/globalClusterWatch"]
     }
   },
   methods: {

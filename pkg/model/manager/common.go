@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/openspacee/osp/pkg/kube_resource"
 	"time"
 )
 
@@ -15,6 +16,19 @@ type CommonManager struct {
 	modelKey string
 
 	context.Context
+	*kube_resource.MiddleMessage
+	watch bool
+}
+
+func NewCommonManager(redisClient *redis.Client, key string, watch bool) *CommonManager {
+	middleMessage := kube_resource.NewMiddleMessageWithClient(nil, redisClient)
+	return &CommonManager{
+		client:        redisClient,
+		modelKey:      key,
+		Context:       context.Background(),
+		MiddleMessage: middleMessage,
+		watch:         watch,
+	}
 }
 
 func (cm *CommonManager) Get(key string, keyObj interface{}) error {
@@ -66,6 +80,52 @@ func (cm *CommonManager) Save(key string, keyObj interface{}, expire time.Durati
 			return err
 		}
 	}
+	if cm.watch {
+
+		eventObj := NewEventObj(AddEvent, cm.modelKey, keyObj)
+		cm.MiddleMessage.SendGlobalWatch(eventObj)
+	}
+
+	return nil
+}
+
+func (cm *CommonManager) Update(key string, keyObj interface{}, expire time.Duration, sets bool) error {
+
+	if sets {
+		if err := cm.AddSets(key); err == nil {
+			return fmt.Errorf("duplicate key")
+		}
+	}
+
+	jsonbody, _ := json.Marshal(keyObj)
+	var m map[string]interface{}
+	err := json.Unmarshal(jsonbody, &m)
+	if err != nil {
+		return err
+	}
+
+	if expire < 1 {
+		err = cm.client.HMSet(cm.Context, cm.PrimaryKey(key), m).Err()
+		if err != nil {
+			return err
+		}
+	} else {
+		pipeline := cm.client.Pipeline()
+		pipeline.HMSet(cm.Context, cm.PrimaryKey(key), m)
+		pipeline.Expire(cm.Context, cm.PrimaryKey(key), expire)
+		_, err := pipeline.Exec(cm.Context)
+		if err != nil {
+			return err
+		}
+	}
+
+	if cm.watch {
+		obj := make(map[string]interface{})
+		cm.Get(key, &obj)
+
+		eventObj := NewEventObj(UpdateEvent, cm.modelKey, obj)
+		cm.MiddleMessage.SendGlobalWatch(eventObj)
+	}
 
 	return nil
 }
@@ -77,6 +137,11 @@ func (cm *CommonManager) Delete(key string) error {
 	_, err := pipeline.Exec(cm.Context)
 	if err != nil {
 		return err
+	}
+
+	if cm.watch {
+		eventObj := NewEventObj(DeleteEvent, cm.modelKey, map[string]interface{}{"name": key})
+		cm.MiddleMessage.SendGlobalWatch(eventObj)
 	}
 	return nil
 }
@@ -130,4 +195,24 @@ func (cm *CommonManager) AddSets(name string) error {
 		return err
 	}
 	return nil
+}
+
+type EventObj struct {
+	Event    string      `json:"event"`
+	Obj      string      `json:"obj"`
+	Resource interface{} `json:"resource"`
+}
+
+const (
+	AddEvent    = "add"
+	UpdateEvent = "update"
+	DeleteEvent = "delete"
+)
+
+func NewEventObj(event, objKey string, obj interface{}) *EventObj {
+	return &EventObj{
+		Event:    event,
+		Obj:      objKey,
+		Resource: obj,
+	}
 }
