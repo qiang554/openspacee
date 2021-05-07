@@ -64,6 +64,13 @@ const Routes = [
         meta: { title: '无状态', group: 'cluster', sideName: 'deployments' },
       },
       {
+        path: 'deployments/create',
+        name: 'deploymentCreate',
+        hidden: true,
+        component: () => import('@/views/cluster/deploymentCreate1'),
+        meta: { title: '无状态', group: 'cluster', sideName: 'deployments' },
+      },
+      {
         path: 'statefulsets',
         name: 'statefulsets',
         component: () => import('@/views/cluster/statefulset'),
@@ -77,6 +84,13 @@ const Routes = [
         meta: { title: '有状态', group: 'cluster', sideName: "statefulsets" }
       },
       {
+        path: 'statefulsets/create',
+        name: 'statefulsetCreate',
+        hidden: true,
+        component: () => import('@/views/cluster/statefulsetCreate'),
+        meta: { title: '有状态', group: 'cluster', sideName: 'statefulsets' },
+      },
+      {
         path: 'daemonsets',
         name: 'daemonsets',
         component: () => import('@/views/cluster/daemonset'),
@@ -88,6 +102,13 @@ const Routes = [
         hidden: true,
         component: () => import('@/views/cluster/daemonsetDetail'),
         meta: { title: '守护进程集', group: 'cluster', sideName: "daemonsets" }
+      },
+      {
+        path: 'daemonsets/create',
+        name: 'daemonsetCreate',
+        hidden: true,
+        component: () => import('@/views/cluster/daemonsetCreate'),
+        meta: { title: '守护进程集', group: 'cluster', sideName: 'daemonsets' },
       },
       {
         path: 'job',

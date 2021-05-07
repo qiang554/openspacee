@@ -125,10 +125,11 @@ func (a *ApiWebsocket) writeMsg() {
 	for {
 		select {
 		case msg, ok := <-a.sendChan:
-			klog.Info(msg, ok)
-			err := a.wsConn.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				klog.Errorf("write api websocket error: %s", err.Error())
+			if ok {
+				err := a.wsConn.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					klog.Errorf("write api websocket error: %s", err.Error())
+				}
 			}
 		case <-a.closeChan:
 			klog.Info("write websocket msg close")

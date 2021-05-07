@@ -34,6 +34,7 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	engine.SetHTMLTemplate(t)
 	//engine.StaticFS("/static", http.Dir("ui/dist/static"))
 	engine.StaticFS("/static", Assets)
+	engine.StaticFile("/favicon.ico", "./favicon.ico")
 	//a := Assets.Dirs["/ui/dist/static"]
 	//fullName := filepath.Join("ui/dist/static", filepath.FromSlash(path.Clean("/"+"css/index.html")))
 	//klog.Info(fullName)

@@ -37,3 +37,11 @@ export function applyYaml(cluster, yaml) {
     data: {yaml: yaml},
   })
 }
+
+export function createYaml(cluster, yaml) {
+  return request({
+    url: `/cluster/createYaml/${cluster}`,
+    method: 'post',
+    data: {yaml: yaml},
+  })
+}

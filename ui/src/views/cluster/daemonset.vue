@@ -1,6 +1,7 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" :delFunc="delFunc"/>
+    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" :delFunc="delFunc"
+      :createFunc="createFunc" createDisplay="创建"/>
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table
@@ -347,6 +348,9 @@ export default {
       } else {
         this.delFunc = undefined
       }
+    },
+    createFunc() {
+      this.$router.push({name: 'daemonsetCreate'})
     }
   }
 }

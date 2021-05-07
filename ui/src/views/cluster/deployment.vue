@@ -1,6 +1,7 @@
 <template>
   <div>
-    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" :delFunc="delFunc"/>
+    <clusterbar :titleName="titleName" :nsFunc="nsSearch" :nameFunc="nameSearch" :delFunc="delFunc" 
+      :createFunc="createFunc" createDisplay="创建"/>
     <div class="dashboard-container">
       <!-- <div class="dashboard-text"></div> -->
       <el-table
@@ -67,7 +68,9 @@
           <template slot-scope="scope">
             <template v-if="scope.row.conditions">
               <span v-for="c in scope.row.conditions" :key="c">
-                {{ c }}
+                <span v-if="c === 'Available'" style="color: rgb(102, 177, 255)">{{ c }}</span>
+                <span v-if="c === 'Progressing'" style="color: #67C23A"> {{ c }}</span>
+                <span v-if="c === 'ReplicaFailure'" style="color: #F56C6C"> {{ c }}</span>
               </span>
             </template>
           </template>
@@ -405,6 +408,9 @@ export default {
       } else {
         this.delFunc = undefined
       }
+    },
+    createFunc() {
+      this.$router.push({name: 'deploymentCreate'})
     }
   }
 }

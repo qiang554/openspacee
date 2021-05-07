@@ -209,7 +209,7 @@ func (m *MiddleMessage) ReceiveWatch(cluster string, reqHandle func(string)) err
 			klog.Errorf("receive message error: %s", err.Error())
 			return err
 		}
-		klog.Info(data.Payload)
+		klog.V(1).Info(data.Payload)
 		reqHandle(data.Payload)
 	}
 }
