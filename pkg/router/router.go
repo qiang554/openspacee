@@ -76,6 +76,10 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	kubeWs := ws_views.NewKubeWs(redisOptions, models)
 	apiGroup.GET("/kube/connect", kubeWs.Connect)
 
+	// 连接k8s agent的websocket接口，用来并发传输返回数据
+	kubeResp := ws_views.NewKubeResp(redisOptions, models)
+	apiGroup.GET("/kube/response", kubeResp.Connect)
+
 	// 连接api websocket接口
 	apiWs := ws_views.NewApiWs(redisOptions, models, kubeResources)
 	engine.GET("/ws/web/connect", apiWs.Connect)

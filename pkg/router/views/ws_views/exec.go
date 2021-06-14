@@ -40,7 +40,6 @@ func (e *ExecWs) Connect(c *gin.Context) {
 		ws.Close()
 		return
 	}
-	klog.Info(token)
 	_, err = e.models.TokenManager.Get(token)
 	if err != nil {
 		klog.Errorf("auth token error: %s", err.Error())
@@ -75,5 +74,5 @@ func (e *ExecWs) Connect(c *gin.Context) {
 	execWebsocket := kubewebsocket.NewExecWebsocket(cluster, ws, e.redisOptions, e.KubeResources,
 		namespace, pod, container, rows, cols)
 	go execWebsocket.Consume()
-	klog.Info("exec websocket connect finish")
+	klog.V(1).Info("exec websocket connect finish")
 }

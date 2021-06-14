@@ -65,7 +65,7 @@
                   show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>
-                      {{ scope.row.backend.serviceName }}
+                      {{ scope.row.backend.service.name }}
                     </span>
                   </template>
                 </el-table-column>
@@ -76,7 +76,7 @@
                   show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>
-                      {{ scope.row.backend.servicePort }}
+                      {{ scope.row.backend.service.port.number }}
                     </span>
                   </template>
                 </el-table-column>

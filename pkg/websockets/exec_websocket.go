@@ -50,7 +50,7 @@ func NewExecWebsocket(
 }
 
 func (e *ExecWebsocket) Consume() {
-	klog.Info("start consume exec ", e.cluster)
+	klog.V(1).Info("start consume exec ", e.cluster)
 	execParams := map[string]interface{}{
 		"namespace":  e.namespace,
 		"name":       e.pod,
@@ -70,7 +70,7 @@ func (e *ExecWebsocket) Consume() {
 }
 
 func (e *ExecWebsocket) MiddleTermHandle() {
-	klog.Infof("start receive term session %s", e.sessionId)
+	klog.V(1).Infof("start receive term session %s", e.sessionId)
 	for !e.stopped {
 		e.middleMessage.ReceiveTerm(e.sessionId, func(data string) {
 			d, err := base64.StdEncoding.DecodeString(data)
@@ -81,7 +81,7 @@ func (e *ExecWebsocket) MiddleTermHandle() {
 			}
 		})
 	}
-	klog.Infof("end receive term session %s data", e.sessionId)
+	klog.V(1).Infof("end receive term session %s data", e.sessionId)
 }
 
 func (e *ExecWebsocket) WsReceiveMsg() {
@@ -92,7 +92,7 @@ func (e *ExecWebsocket) WsReceiveMsg() {
 			klog.Error("read err:", err)
 			break
 		}
-		klog.Infof("read data: %s", string(data))
+		klog.V(1).Infof("read data: %s", string(data))
 		params := map[string]interface{}{
 			"session_id": e.sessionId,
 			"input":      data,
@@ -105,9 +105,18 @@ func (e *ExecWebsocket) WsReceiveMsg() {
 }
 
 func (e *ExecWebsocket) Clean() {
-	klog.Infof("start clean cluster %s websocket", e.cluster)
+	klog.V(1).Infof("start clean cluster %s websocket", e.cluster)
 	e.stopped = true
 	e.middleMessage.Close()
 	e.wsConn.Close()
-	klog.Infof("end clean cluster %s websocket", e.cluster)
+	execParams := map[string]interface{}{
+		"session_id": e.sessionId,
+	}
+	e.Pod.CloseExecConn(e.cluster, execParams)
+	//if !resp.IsSuccess() {
+	//	e.wsConn.WriteMessage(websocket.TextMessage, []byte(resp.Msg))
+	//	e.wsConn.Close()
+	//	return
+	//}
+	klog.V(1).Infof("end clean cluster %s websocket", e.cluster)
 }

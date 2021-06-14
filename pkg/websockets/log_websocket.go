@@ -44,7 +44,7 @@ func NewLogWebsocket(
 }
 
 func (l *LogWebsocket) Consume() {
-	klog.Info("start consume log cluster ", l.cluster)
+	klog.V(1).Info("start consume log cluster ", l.cluster)
 	logParams := map[string]interface{}{
 		"namespace":  l.namespace,
 		"name":       l.pod,
@@ -62,7 +62,7 @@ func (l *LogWebsocket) Consume() {
 }
 
 func (l *LogWebsocket) MiddleLogHandle() {
-	klog.Infof("start receive log session %s", l.sessionId)
+	klog.V(1).Infof("start receive log session %s", l.sessionId)
 	for !l.stopped {
 		l.middleMessage.ReceiveLog(l.sessionId, func(data string) {
 			d, err := base64.StdEncoding.DecodeString(data)
@@ -73,7 +73,7 @@ func (l *LogWebsocket) MiddleLogHandle() {
 			}
 		})
 	}
-	klog.Infof("end receive log session %s data", l.sessionId)
+	klog.V(1).Infof("end receive log session %s data", l.sessionId)
 }
 
 func (l *LogWebsocket) WsReceiveMsg() {
@@ -88,10 +88,10 @@ func (l *LogWebsocket) WsReceiveMsg() {
 }
 
 func (l *LogWebsocket) Clean() {
-	klog.Infof("start clean log cluster %s websocket", l.cluster)
+	klog.V(1).Infof("start clean log cluster %s websocket", l.cluster)
 	l.stopped = true
 	l.Pod.CloseLog(l.cluster, map[string]interface{}{"session_id": l.sessionId})
 	l.middleMessage.Close()
 	l.wsConn.Close()
-	klog.Info("end clean log cluster websocket")
+	klog.V(1).Info("end clean log cluster websocket")
 }

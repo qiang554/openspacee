@@ -31,7 +31,7 @@ func NewApiWebsocket(ws *websocket.Conn, redisOp *redis.Options, kr *kube_resour
 }
 
 func (a *ApiWebsocket) Consume() {
-	klog.Info("start consume api ")
+	klog.V(1).Info("start consume api ")
 	go a.WsReceiveMsg()
 	go a.receiveGlobalMsg()
 	go a.writeMsg()
@@ -51,9 +51,9 @@ func (a *ApiWebsocket) WsReceiveMsg() {
 		if startWatch {
 			<-stopChan
 		}
-		klog.Info("end receive watch")
+		klog.V(1).Info("end receive watch")
 	}()
-	klog.Info("start read message")
+	klog.V(1).Info("start read message")
 	for {
 		_, data, err := a.wsConn.ReadMessage()
 		if err != nil {
@@ -71,9 +71,7 @@ func (a *ApiWebsocket) WsReceiveMsg() {
 			stopWatch = true
 			clusterMsg := apiMsg.Params.(map[string]interface{})
 			cluster := clusterMsg["cluster"].(string)
-			klog.Info(cluster)
 			if cluster == a.watchCluster {
-				klog.Info("current watch cluster equal")
 				continue
 			}
 			if startWatch {
@@ -93,7 +91,7 @@ func (a *ApiWebsocket) WsReceiveMsg() {
 					}
 					a.watchCluster = cluster
 					for !stopWatch {
-						klog.Info("start receive watch data")
+						klog.V(1).Info("start receive watch data")
 						middleMessage.ReceiveWatch(cluster, func(data string) {
 							a.sendChan <- []byte(data)
 						})
@@ -108,17 +106,17 @@ func (a *ApiWebsocket) WsReceiveMsg() {
 			}
 		}
 	}
-	klog.Info("end receive api websocket")
+	klog.V(1).Info("end receive api websocket")
 }
 
 func (a *ApiWebsocket) receiveGlobalMsg() {
-	klog.Infof("start receive global cluster msg")
+	klog.V(1).Infof("start receive global cluster msg")
 	for !a.stopped {
 		a.globalMiddleMsg.ReceiveGlobalWatch(func(data string) {
 			a.sendChan <- []byte(data)
 		})
 	}
-	klog.Infof("end receive global cluster msg")
+	klog.V(1).Infof("end receive global cluster msg")
 }
 
 func (a *ApiWebsocket) writeMsg() {
@@ -132,7 +130,7 @@ func (a *ApiWebsocket) writeMsg() {
 				}
 			}
 		case <-a.closeChan:
-			klog.Info("write websocket msg close")
+			klog.V(1).Info("write websocket msg close")
 			return
 		}
 	}

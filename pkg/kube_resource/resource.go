@@ -8,6 +8,7 @@ import (
 const (
 	ListAction       = "list"
 	ExecAction       = "exec"
+	CloseExecConn    = "closeExecConn"
 	GetAction        = "get"
 	DeleteAction     = "delete"
 	UpdateYamlAction = "update_yaml"
@@ -54,6 +55,10 @@ func (k *KubeResource) Apply(cluster string, params interface{}) *utils.Response
 
 func (k *KubeResource) Exec(cluster string, params interface{}) *utils.Response {
 	return k.request(cluster, ExecAction, params)
+}
+
+func (k *KubeResource) CloseExecConn(cluster string, params interface{}) *utils.Response {
+	return k.request(cluster, CloseExecConn, params)
 }
 
 func (k *KubeResource) Stdin(cluster string, params interface{}) *utils.Response {

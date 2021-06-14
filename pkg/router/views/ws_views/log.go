@@ -40,7 +40,6 @@ func (l *LogWs) Connect(c *gin.Context) {
 		ws.Close()
 		return
 	}
-	klog.Info(token)
 	_, err = l.models.TokenManager.Get(token)
 	if err != nil {
 		klog.Errorf("auth token error: %s", err.Error())
@@ -73,5 +72,5 @@ func (l *LogWs) Connect(c *gin.Context) {
 	logWebsocket := kubewebsocket.NewLogWebsocket(cluster, ws, l.redisOptions, l.KubeResources,
 		namespace, pod, container)
 	go logWebsocket.Consume()
-	klog.Info("log websocket connect finish")
+	klog.V(1).Info("log websocket connect finish")
 }

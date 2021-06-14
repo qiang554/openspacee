@@ -4,27 +4,27 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/openspacee/osp/pkg/model"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	kubewebsocket "github.com/openspacee/osp/pkg/websockets"
 	"k8s.io/klog"
 )
 
-type KubeWs struct {
+type KubeResp struct {
 	redisOptions *redis.Options
 	models       *model.Models
 }
 
-func NewKubeWs(op *redis.Options, models *model.Models) *KubeWs {
-	return &KubeWs{
+func NewKubeResp(op *redis.Options, models *model.Models) *KubeResp {
+	return &KubeResp{
 		redisOptions: op,
 		models:       models,
 	}
 }
 
-func (k *KubeWs) Connect(c *gin.Context) {
+func (k *KubeResp) Connect(c *gin.Context) {
 
 	token := c.GetHeader("token")
+	klog.V(1).Info(token)
 
 	cluster, err := k.models.ClusterManager.GetByToken(token)
 	if err != nil {
@@ -42,10 +42,7 @@ func (k *KubeWs) Connect(c *gin.Context) {
 		klog.Errorf("upgrader agent conn error: %s", err)
 		return
 	}
-
-	kubeWebsocket := kubewebsocket.NewKubeWebsocket(cluster.Name, ws, k.redisOptions, k.models)
+	kubeWebsocket := kubewebsocket.NewKubeRespWebsocket(cluster.Name, ws, k.redisOptions, k.models)
 	kubeWebsocket.Consume()
-	cluster.Status = types.ClusterConnect
-	k.models.ClusterManager.Update(cluster)
-	klog.V(1).Infof("cluster %s kube connect finish", cluster.Name)
+	klog.V(1).Infof("cluster %s kube response connect finish", cluster.Name)
 }

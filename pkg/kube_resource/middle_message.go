@@ -50,7 +50,7 @@ func (m *MiddleMessage) ReceiveRequest(cluster string, reqHandle func(*MiddleReq
 	reqSubKey := m.ClusterRequestQueueKey(cluster)
 	pubsub := m.client.Subscribe(m.Context, reqSubKey)
 	defer pubsub.Close()
-	klog.Infof("start receive pubsub %s message", cluster)
+	klog.V(1).Infof("start receive pubsub %s message", cluster)
 	for {
 		data, err := pubsub.ReceiveMessage(m.Context)
 		if err != nil {
@@ -145,7 +145,7 @@ func (m *MiddleMessage) ReceiveGlobalWatch(reqHandle func(string)) error {
 	reqSubKey := m.GlobalWatchQueueKey()
 	pubsub := m.client.Subscribe(m.Context, reqSubKey)
 	defer pubsub.Close()
-	klog.Infof("start receive global pubsub message")
+	klog.V(1).Infof("start receive global pubsub message")
 	for {
 		data, err := pubsub.ReceiveMessage(m.Context)
 		if err != nil {
@@ -202,7 +202,7 @@ func (m *MiddleMessage) ReceiveWatch(cluster string, reqHandle func(string)) err
 	reqSubKey := m.ClusterWatchQueueKey(cluster)
 	pubsub := m.client.Subscribe(m.Context, reqSubKey)
 	defer pubsub.Close()
-	klog.Infof("start receive pubsub %s message", cluster)
+	klog.V(1).Infof("start receive pubsub %s message", cluster)
 	for {
 		data, err := pubsub.ReceiveMessage(m.Context)
 		if err != nil {
@@ -243,7 +243,7 @@ func (m *MiddleMessage) ClusterTermQueueKey(sessionId string) string {
 
 func (m *MiddleMessage) ReceiveTerm(sessionId string, reqHandle func(string)) error {
 	termKey := m.ClusterTermQueueKey(sessionId)
-	klog.Infof("start receive term %s message", termKey)
+	klog.V(1).Infof("start receive term %s message", termKey)
 	for {
 		data, err := m.client.BRPop(m.Context, time.Duration(0), termKey).Result()
 		if err != nil {
@@ -270,14 +270,14 @@ func (m *MiddleMessage) ClusterLogQueueKey(sessionId string) string {
 
 func (m *MiddleMessage) ReceiveLog(sessionId string, reqHandle func(string)) error {
 	termKey := m.ClusterLogQueueKey(sessionId)
-	klog.Infof("start receive log %s message", termKey)
+	klog.V(1).Infof("start receive log %s message", termKey)
 	for {
 		data, err := m.client.BRPop(m.Context, time.Duration(0), termKey).Result()
 		if err != nil {
 			klog.Error("receive log data error: ", err.Error())
 			return err
 		}
-		klog.Info("receive log ", data[1])
+		klog.V(5).Info("receive log ", data[1])
 		reqHandle(data[1])
 	}
 }

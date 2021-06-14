@@ -4,12 +4,11 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
-	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	"k8s.io/klog"
 )
 
-type KubeWebsocket struct {
+type KubeRespWebsocket struct {
 	redisOptions  *redis.Options
 	middleMessage *kube_resource.MiddleMessage
 	cluster       string
@@ -18,9 +17,9 @@ type KubeWebsocket struct {
 	models        *model.Models
 }
 
-func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options, models *model.Models) *KubeWebsocket {
+func NewKubeRespWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options, models *model.Models) *KubeRespWebsocket {
 	middleMsg := kube_resource.NewMiddleMessage(redisOp)
-	return &KubeWebsocket{
+	return &KubeRespWebsocket{
 		cluster:       cluster,
 		redisOptions:  redisOp,
 		middleMessage: middleMsg,
@@ -30,29 +29,17 @@ func NewKubeWebsocket(cluster string, ws *websocket.Conn, redisOp *redis.Options
 	}
 }
 
-func (k *KubeWebsocket) Consume() {
+func (k *KubeRespWebsocket) Consume() {
 	klog.V(1).Info("start consume cluster ", k.cluster)
 	go k.WsReceiveMsg()
-	go k.MiddleRequestHandle()
 }
 
-func (k *KubeWebsocket) MiddleRequestHandle() {
-	for !k.stopped {
-		klog.V(1).Info("start receive request from cluster ", k.cluster)
-		k.middleMessage.ReceiveRequest(k.cluster, func(mr *kube_resource.MiddleRequest) {
-			serReq, _ := mr.Serializer()
-			k.wsConn.WriteMessage(websocket.TextMessage, serReq)
-		})
-	}
-	klog.V(1).Info("middle request handle end")
-}
-
-func (k *KubeWebsocket) WsReceiveMsg() {
+func (k *KubeRespWebsocket) WsReceiveMsg() {
 	defer k.Clean()
 	for {
 		_, data, err := k.wsConn.ReadMessage()
 		if err != nil {
-			klog.Error("read err:", err)
+			klog.V(1).Info("read err:", err)
 			break
 		}
 		klog.V(1).Infof("read data: %s", string(data))
@@ -73,17 +60,10 @@ func (k *KubeWebsocket) WsReceiveMsg() {
 	}
 }
 
-func (k *KubeWebsocket) Clean() {
-	klog.V(1).Infof("start clean cluster %s websocket", k.cluster)
-	clusterObj, err := k.models.ClusterManager.Get(k.cluster)
-	if err != nil {
-		klog.Errorf("get cluster %s object error: %s", k.cluster, err.Error())
-	} else {
-		clusterObj.Status = types.ClusterPending
-		k.models.ClusterManager.Update(clusterObj)
-	}
+func (k *KubeRespWebsocket) Clean() {
+	klog.V(1).Infof("start clean kube response cluster %s websocket", k.cluster)
 	k.middleMessage.Close()
 	k.stopped = true
 	k.wsConn.Close()
-	klog.V(1).Info("end clean cluster websocket")
+	klog.V(1).Info("end clean kube response cluster websocket")
 }

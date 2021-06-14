@@ -40,7 +40,7 @@ func (a *ApiWs) Connect(c *gin.Context) {
 		ws.Close()
 		return
 	}
-	klog.Info(token)
+	klog.V(1).Info(token)
 	_, err = a.models.TokenManager.Get(token)
 	if err != nil {
 		klog.Errorf("auth token error: %s", err.Error())
@@ -51,5 +51,5 @@ func (a *ApiWs) Connect(c *gin.Context) {
 
 	apiWebsocket := kubewebsocket.NewApiWebsocket(ws, a.redisOptions, a.KubeResources)
 	go apiWebsocket.Consume()
-	klog.Info("cluster api connect finish")
+	klog.V(1).Info("cluster api connect finish")
 }
