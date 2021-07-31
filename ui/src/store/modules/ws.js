@@ -8,7 +8,6 @@ const state = getDefaultState()
 
 const mutations = {
   UPDATE_CLUSTER_WATCH: (state, obj) => {
-    console.log(obj)
     state.clusterWatch = obj
   },
 }

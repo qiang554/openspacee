@@ -115,11 +115,11 @@
                 <el-dropdown size="medium" >
                   <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item @click.native.prevent="namePodClick(scope.row.namespace, scope.row.name)">
+                    <el-dropdown-item v-if="$podOpPerm('get')" @click.native.prevent="namePodClick(scope.row.namespace, scope.row.name)">
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="detail" />
                       <span style="margin-left: 5px;">详情</span>
                     </el-dropdown-item>
-                    <div @mouseover="logContainerShow = true;" @mouseout="logContainerShow = false;">
+                    <div v-if="$podOpPerm('get')" @mouseover="logContainerShow = true;" @mouseout="logContainerShow = false;">
                       <el-dropdown-item @click.native.prevent="selectContainer = scope.row.containers[0].name; selectPodName = scope.row.name; logDialog = true;">
                         <div class="download">
                           <div>
@@ -139,7 +139,7 @@
                         </div>
                       </el-dropdown-item>
                     </div>
-                    <div @mouseover="termContainerShow = true;" @mouseout="termContainerShow = false;">
+                    <div v-if="$podOpPerm('update')" @mouseover="termContainerShow = true;" @mouseout="termContainerShow = false;">
                       <el-dropdown-item @click.native.prevent="selectContainer = scope.row.containers[0].name; selectPodName = scope.row.name; terminalDialog = true;">
                         <div class="download">
                           <div>
@@ -155,7 +155,7 @@
                         </div>
                       </el-dropdown-item>
                     </div>
-                    <el-dropdown-item @click.native.prevent="deletePods([{namespace: scope.row.namespace, name: scope.row.name}])">
+                    <el-dropdown-item v-if="$podOpPerm('delete')" @click.native.prevent="deletePods([{namespace: scope.row.namespace, name: scope.row.name}])">
                       <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                       <span style="margin-left: 5px;">删除</span>
                     </el-dropdown-item>
@@ -829,8 +829,10 @@ export default {
 }
 
 .pod-item {
-  margin: 20px 20px 20px 5px;
+  margin: 20px 5px 30px 5px;
+  padding: 10px 20px;
   font-size: 0;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 .pod-item label {
   width: 90px;

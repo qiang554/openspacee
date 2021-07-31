@@ -15,6 +15,14 @@ export function createCluster(data) {
   })
 }
 
+export function clusterMembers(data) {
+  return request({
+    url: '/cluster/members',
+    method: 'post',
+    data,
+  })
+}
+
 export function clusterDetail(cluster) {
   return request({
     url: `/cluster/${cluster}/detail`,

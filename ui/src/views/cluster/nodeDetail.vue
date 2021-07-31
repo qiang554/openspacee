@@ -482,8 +482,10 @@ export default {
 .item-class  */
 
 .pod-item {
-  padding: 5px 20px 10px 15px;
-  font-size: 14px;
+  margin: 20px 5px 30px 5px;
+  padding: 10px 20px;
+  font-size: 0;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 .pod-item label {
   /* width: 120px; */

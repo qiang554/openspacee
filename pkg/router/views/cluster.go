@@ -25,6 +25,7 @@ func NewCluster(models *model.Models, kr *kube_resource.KubeResources) *Cluster 
 	views := []*View{
 		NewView(http.MethodGet, "", cluster.list),
 		NewView(http.MethodPost, "", cluster.create),
+		NewView(http.MethodPost, "/members", cluster.members),
 		NewView(http.MethodGet, "/:cluster/detail", cluster.detail),
 		NewView(http.MethodPost, "/delete", cluster.delete),
 		NewView(http.MethodPost, "/apply/:cluster", cluster.apply),
@@ -46,6 +47,9 @@ func (clu *Cluster) list(c *Context) *utils.Response {
 	var data []map[string]interface{}
 
 	for _, du := range clus {
+		if !clu.models.ClusterManager.HasMember(du, c.User) {
+			continue
+		}
 		status := types.ClusterPending
 		clusterConnect := clu.Watch.KubeMessage.ClusterConnected(du.Name)
 		if clusterConnect {
@@ -55,6 +59,8 @@ func (clu *Cluster) list(c *Context) *utils.Response {
 			"name":        du.Name,
 			"token":       du.Token,
 			"status":      status,
+			"created_by":  du.CreatedBy,
+			"members":     du.Members,
 			"create_time": du.CreateTime,
 			"update_time": du.UpdateTime,
 		})
@@ -78,14 +84,54 @@ func (clu *Cluster) create(c *Context) *utils.Response {
 		return resp
 	}
 	cluster := &types.Cluster{
-		Name:   ser.Name,
-		Token:  utils.CreateUUID(),
-		Status: types.ClusterPending,
+		Name:      ser.Name,
+		Token:     utils.CreateUUID(),
+		Status:    types.ClusterPending,
+		CreatedBy: c.User.Name,
+		Members:   ser.Members,
 	}
 	cluster.CreateTime = utils.StringNow()
 	cluster.UpdateTime = utils.StringNow()
 	if err := clu.models.ClusterManager.Create(cluster); err != nil {
 		resp.Code = code.CreateError
+		resp.Msg = err.Error()
+		return resp
+	}
+	d := map[string]interface{}{
+		"name":        cluster.Name,
+		"token":       cluster.Token,
+		"status":      cluster.Status,
+		"create_time": cluster.CreateTime,
+		"update_time": cluster.UpdateTime,
+	}
+	resp.Data = d
+	return resp
+}
+
+func (clu *Cluster) members(c *Context) *utils.Response {
+	var ser ClusterCreateSerializers
+	resp := &utils.Response{Code: code.Success}
+
+	if err := c.ShouldBind(&ser); err != nil {
+		resp.Code = code.ParamsError
+		resp.Msg = err.Error()
+		return resp
+	}
+	if ser.Name == "" {
+		resp.Code = code.ParamsError
+		resp.Msg = fmt.Sprintf("params cluster name:%s blank", ser.Name)
+		return resp
+	}
+	cluster, err := clu.models.ClusterManager.Get(ser.Name)
+	if err != nil {
+		resp.Code = code.GetError
+		resp.Msg = fmt.Sprintf("get cluster %s error: %s", ser.Name, err.Error())
+		return resp
+	}
+	cluster.Members = ser.Members
+	cluster.UpdateTime = utils.StringNow()
+	if err := clu.models.ClusterManager.Update(cluster); err != nil {
+		resp.Code = code.UpdateError
 		resp.Msg = err.Error()
 		return resp
 	}
@@ -106,7 +152,6 @@ func (clu *Cluster) detail(c *Context) *utils.Response {
 
 func (clu *Cluster) apply(c *Context) *utils.Response {
 	var ser ApplyYamlSerializers
-	//klog.Info(c.Request.Body)
 	if err := c.ShouldBind(&ser); err != nil {
 		klog.Errorf("bind params error: %s", err.Error())
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
@@ -126,12 +171,10 @@ func (clu *Cluster) createYaml(c *Context) *utils.Response {
 
 func (clu *Cluster) delete(c *Context) *utils.Response {
 	var ser []DeleteClusterSerializers
-	//klog.Info(c.Request.Body)
 	if err := c.ShouldBind(&ser); err != nil {
 		klog.Errorf("bind params error: %s", err.Error())
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}
 	}
-	klog.Info(ser)
 	for _, c := range ser {
 		err := clu.models.ClusterManager.Delete(c.Name)
 		if err != nil {

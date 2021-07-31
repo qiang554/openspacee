@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/openspacee/osp/pkg/kube_resource"
+	"k8s.io/klog"
 	"time"
 )
 
@@ -63,12 +64,14 @@ func (cm *CommonManager) Save(key string, keyObj interface{}, expire time.Durati
 	var m map[string]interface{}
 	err := json.Unmarshal(jsonbody, &m)
 	if err != nil {
+		klog.Error(err)
 		return err
 	}
 
 	if expire < 1 {
 		err = cm.client.HMSet(cm.Context, cm.PrimaryKey(key), m).Err()
 		if err != nil {
+			klog.Error(err)
 			return err
 		}
 	} else {

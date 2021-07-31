@@ -3,7 +3,6 @@ import store from './store'
 import { getToken } from '@/utils/auth' // get token from cookie
 
 var wsOnOpen = function() {
-  console.log("ws connect success")
   // ws.send(JSON.stringify({action: "watchCluster", params: {cluster: "test"}}))
 }
 
@@ -13,7 +12,6 @@ var wsOnError = function(e) {
 
 var wsOnMessage = function(e) {
   let data = JSON.parse(e.data)
-  console.log("receive watch", data)
   store.commit('ws/UPDATE_CLUSTER_WATCH', data)
 }
 

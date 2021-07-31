@@ -5,13 +5,13 @@ import ws from "./modules/ws";
 
 import { getToken } from '@/utils/auth' // get token from cookie
 
-// console.log(ws)
-
 Vue.use(Vuex)
 
 const getters = {
   token: state => state.user.token,
   username: state => state.user.name,
+  permissions: state => state.user.permissions,
+  userInfo: state => state.user.userInfo,
   clusterWatch: state => state.ws.clusterWatch,
   uidWatch: (state) => (uid) => {
     if (state.ws.clusterWatch && state.ws.clusterWatch.resource && state.ws.clusterWatch.resource.metadata.uid == uid) {
@@ -34,8 +34,7 @@ var wsConn = null
 
 const actions = {
   watchCluster({ commit }, cluster) {
-    console.log('watch cluster', cluster)
-    if (wsConn) {
+    if (wsConn && wsConn.readyState === 1) {
       wsConn.send(JSON.stringify({action: "watchCluster", params: {cluster: cluster}}))
     }
     commit('SET_CLUSTER', cluster)
@@ -54,7 +53,6 @@ const store = new Vuex.Store({
 })
 
 var wsOnOpen = function() {
-  console.log("ws connect success")
   wsConn.send(JSON.stringify({action: "watchCluster", params: {cluster: state.cluster}}))
 }
 
@@ -65,7 +63,6 @@ var wsOnError = function(e) {
 
 var wsOnMessage = function(e) {
   let data = JSON.parse(e.data)
-  console.log("receive watch", data)
   store.commit('ws/UPDATE_CLUSTER_WATCH', data)
 }
 

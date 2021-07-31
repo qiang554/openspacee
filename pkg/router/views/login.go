@@ -8,6 +8,7 @@ import (
 	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
+	"k8s.io/klog"
 	"net/http"
 	"strings"
 )
@@ -56,9 +57,9 @@ func (l Login) Login(c *gin.Context) {
 
 	tkObj := types.Token{
 		UserName: user.UserName,
-		Token: uuid.New(),
+		Token:    uuid.New(),
 	}
-	if err := l.models.TokenManager.Create(&tkObj); err != nil  {
+	if err := l.models.TokenManager.Create(&tkObj); err != nil {
 		resp.Code = code.CreateError
 		resp.Msg = fmt.Sprintf("create token for user:%s error:%s", user.UserName, err.Error())
 		c.JSON(http.StatusOK, resp)
@@ -83,12 +84,12 @@ func (l Login) HasAdmin(c *gin.Context) {
 	data := map[string]interface{}{
 		"has": 1,
 	}
-	if _, err := l.models.UserManager.Get("admin"); err != nil {
+	if _, err := l.models.UserManager.Get(types.ADMIN); err != nil {
+		klog.Errorf("get admin err: %v", err)
 		data["has"] = 0
 	}
 	c.JSON(http.StatusOK, &utils.Response{Code: code.Success, Data: data})
 }
-
 
 func (l Login) CreateAdmin(c *gin.Context) {
 	var ser UserCreateSerializers
@@ -101,10 +102,12 @@ func (l Login) CreateAdmin(c *gin.Context) {
 	}
 
 	user := types.User{
-		Name: "admin",
-		Email: ser.Email,
+		Name:     types.ADMIN,
+		Email:    ser.Email,
 		Password: utils.Encrypt(ser.Password),
-		Status: "normal",
+		IsSuper:  true,
+		Status:   "normal",
+		Roles:    []string{types.AdminRole.Name},
 	}
 	user.CreateTime = utils.StringNow()
 	user.UpdateTime = utils.StringNow()
@@ -117,7 +120,7 @@ func (l Login) CreateAdmin(c *gin.Context) {
 	}
 
 	resp.Data = map[string]interface{}{
-		"name": user.Name,
+		"name":     user.Name,
 		"password": user.Password,
 	}
 	c.JSON(http.StatusOK, resp)

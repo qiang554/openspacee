@@ -89,7 +89,7 @@ export default {
       listCluster().then(response => {
         this.loading = false
         this.origin_clusters = response.data ? response.data : []
-        if (!this.origin_clusters) {
+        if (this.origin_clusters.length <= 0) {
           this.noCluster = true
         }
       }).catch(() => {

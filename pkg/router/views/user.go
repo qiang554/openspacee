@@ -33,13 +33,25 @@ func NewUser(models *model.Models) *User {
 }
 
 func (u *User) tokenUser(c *Context) *utils.Response {
-	//userName := ""
-	//if user, ok := c.Get("user"); ok {
-	//	userName = user.(*types.User).Name
-	//}
+	user, err := u.models.UserManager.Get(c.User.Name)
+	if err != nil {
+		return &utils.Response{
+			Code: code.ParamsError,
+			Msg:  err.Error(),
+		}
+	}
+	perms, err := u.models.UserManager.Permissions(user)
+	if err != nil {
+		return &utils.Response{
+			Code: code.ParamsError,
+			Msg:  err.Error(),
+		}
+	}
 	return &utils.Response{Code: code.Success,
 		Data: map[string]interface{}{
-			"name": c.UserName,
+			"name":        c.User.Name,
+			"permissions": perms,
+			"is_super":    user.IsSuper,
 		}}
 }
 
@@ -64,6 +76,14 @@ func (u *User) update(c *Context) *utils.Response {
 
 	if user.Status != "" {
 		userObj.Status = user.Status
+	}
+
+	if user.Password != "" {
+		userObj.Password = utils.Encrypt(user.Password)
+	}
+
+	if user.Roles != nil {
+		userObj.Roles = user.Roles
 	}
 
 	if user.Email != "" {
@@ -96,11 +116,20 @@ func (u *User) list(c *Context) *utils.Response {
 	var data []map[string]interface{}
 
 	for _, du := range dList {
+		perms, err := u.models.UserManager.Permissions(du)
+		if err != nil {
+			resp.Code = code.GetError
+			resp.Msg = err.Error()
+			return resp
+		}
 		data = append(data, map[string]interface{}{
-			"name":       du["name"],
-			"email":      du["email"],
-			"status":     du["status"],
-			"last_login": du["last_login"],
+			"name":        du.Name,
+			"email":       du.Email,
+			"status":      du.Status,
+			"is_super":    du.IsSuper,
+			"last_login":  du.LastLogin,
+			"roles":       du.Roles,
+			"permissions": perms,
 		})
 	}
 	resp.Data = data
@@ -116,8 +145,10 @@ func (u *User) create(c *Context) *utils.Response {
 		resp.Msg = err.Error()
 		return resp
 	}
+	isSuper := false
 	if ser.Name == "" {
-		ser.Name = "admin"
+		ser.Name = types.ADMIN
+		isSuper = true
 	} else {
 		if ok := utils.VerifyEmailFormat(ser.Email); !ok {
 			resp.Code = code.ParamsError
@@ -130,7 +161,9 @@ func (u *User) create(c *Context) *utils.Response {
 		Name:     ser.Name,
 		Password: utils.Encrypt(ser.Password),
 		Email:    ser.Email,
+		IsSuper:  isSuper,
 		Status:   "normal",
+		Roles:    ser.Roles,
 	}
 	userObj.CreateTime = utils.StringNow()
 	userObj.UpdateTime = utils.StringNow()
@@ -151,7 +184,6 @@ func (u *User) create(c *Context) *utils.Response {
 
 func (u *User) delete(c *Context) *utils.Response {
 	var ser []DeleteUserSerializers
-	//klog.Info(c.Request.Body)
 	if err := c.ShouldBind(&ser); err != nil {
 		klog.Errorf("bind params error: %s", err.Error())
 		return &utils.Response{Code: code.ParamsError, Msg: err.Error()}

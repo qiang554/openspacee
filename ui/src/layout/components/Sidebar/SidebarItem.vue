@@ -11,18 +11,20 @@
     </template>
     <template v-else-if="item.meta && item.meta.group && item.meta.group == pathGroup">
       <template v-if="item.children && item.children.length > 0">
-        <el-submenu ref="subMenu" :index="item.name" popper-append-to-body>
-          <template slot="title">
-            <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
-          </template>
-          <sidebar-item
-            v-for="child in item.children"
-            :key="child.path"
-            :item="child"
-          />
-        </el-submenu>
+        <template v-if="hasPerm(item)">
+          <el-submenu ref="subMenu" :index="item.name" popper-append-to-body>
+            <template slot="title">
+              <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
+            </template>
+            <sidebar-item
+              v-for="child in item.children"
+              :key="child.path"
+              :item="child"
+            />
+          </el-submenu>
+        </template>
       </template>
-      <template v-else>
+      <template v-else-if="hasPerm(item)">
         <span v-on:click="routeTo(item)">
           <el-menu-item :index="item.name">
             <item :icon="item.meta && item.meta.icon" :title="item.meta.title" />
@@ -34,7 +36,9 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import Item from './Item'
+import { hasPermission } from "@/api/settings_role";
 
 export default {
   name: 'SidebarItem',
@@ -64,6 +68,22 @@ export default {
       const route = this.$route
       this.$router.push({name: item.name, params: route.params})
     },
+    hasPerm(item) {
+      if(item.children && item.children.length > 0) {
+        for(var childItem of item.children) {
+          var meta = childItem.meta
+          if(meta.perm) return true
+          if(hasPermission(meta.group, meta.object, 'get')) {
+            return true
+          }
+        }
+        return false
+      } else {
+        var meta = item.meta
+        if(meta.perm) return true
+        return hasPermission(meta.group, meta.object, 'get')
+      }
+    }
   }
 }
 </script>

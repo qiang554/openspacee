@@ -12,7 +12,7 @@
           {{ username }}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown" @click.native="logout">
-          <el-dropdown-item>Logout</el-dropdown-item>
+          <el-dropdown-item>登出</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
@@ -56,7 +56,7 @@ export default {
   methods: {
     async logout() {
       await this.$store.dispatch('user/logout')
-      parent.location.href = `/ui/login?redirect=${this.$route.fullPath}`
+      parent.location.href = `/ui/login`
     },
     openYamlDialog: function() {
       // this.yamlValue = "asdfwe"

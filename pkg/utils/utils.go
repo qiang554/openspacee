@@ -22,6 +22,16 @@ func Contains(strList []string, str string) bool {
 	return false
 }
 
+func ParseBool(str string) bool {
+	switch str {
+	case "1", "t", "T", "true", "TRUE", "True":
+		return true
+	case "0", "f", "F", "false", "FALSE", "False":
+		return false
+	}
+	return false
+}
+
 func CreateUUID() string {
 	return uuid.New().String()
 }

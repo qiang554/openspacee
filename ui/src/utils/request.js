@@ -44,8 +44,12 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
+    if(response.status == 401) {
+      let loginUrl = `/ui/login?redirect=${href}`
+      store.dispatch('user/resetToken')
+      parent.location.href = loginUrl
+    }
     const res = response.data
-    console.log(res)
 
     // if the custom code is not Success, it is judged as an error.
     if (res.code !== "Success") {
@@ -69,7 +73,7 @@ service.interceptors.response.use(
       href = document.referrer
     }
     let loginIndex = href && href.indexOf("/ui/login")
-    if (!loginIndex && error && error.response && error.response.status === 401) {
+    if (loginIndex < 0 && error && error.response && error.response.status === 401) {
       let loginUrl = `/ui/login?redirect=${href}`
       store.dispatch('user/resetToken')
       parent.location.href = loginUrl

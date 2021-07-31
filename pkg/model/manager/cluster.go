@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/openspacee/osp/pkg/model/types"
+	"github.com/openspacee/osp/pkg/utils"
+	"k8s.io/klog"
 )
 
 type ClusterManager struct {
@@ -16,8 +18,49 @@ func NewClusterManager(redisClient *redis.Client) *ClusterManager {
 	}
 }
 
+func (clu *ClusterManager) parseToStore(cluster *types.Cluster) (*types.ClusterStore, error) {
+	members, err := json.Marshal(cluster.Members)
+	if err != nil {
+		klog.Error("parse member error", err)
+		return nil, err
+	}
+	clusterStore := &types.ClusterStore{
+		Name:      cluster.Name,
+		Status:    cluster.Status,
+		Token:     cluster.Token,
+		Members:   string(members),
+		Common:    cluster.Common,
+		CreatedBy: cluster.CreatedBy,
+	}
+	return clusterStore, nil
+}
+
+func (clu *ClusterManager) parseToCluster(clusterStore *types.ClusterStore) (*types.Cluster, error) {
+	var members []string
+	if clusterStore.Members != "" {
+		err := json.Unmarshal([]byte(clusterStore.Members), &members)
+		if err != nil {
+			klog.Error("parse member error: ", err)
+			return nil, err
+		}
+	}
+	cluster := &types.Cluster{
+		Name:      clusterStore.Name,
+		Status:    clusterStore.Status,
+		Token:     clusterStore.Token,
+		Members:   members,
+		Common:    clusterStore.Common,
+		CreatedBy: clusterStore.CreatedBy,
+	}
+	return cluster, nil
+}
+
 func (clu *ClusterManager) Create(cluster *types.Cluster) error {
-	if err := clu.CommonManager.Save(cluster.Name, cluster, -1, true); err != nil {
+	clusterStore, err := clu.parseToStore(cluster)
+	if err != nil {
+		return err
+	}
+	if err := clu.CommonManager.Save(cluster.Name, clusterStore, -1, true); err != nil {
 		return err
 	}
 
@@ -25,7 +68,11 @@ func (clu *ClusterManager) Create(cluster *types.Cluster) error {
 }
 
 func (clu *ClusterManager) Update(cluster *types.Cluster) error {
-	if err := clu.CommonManager.Update(cluster.Name, cluster, -1, true); err != nil {
+	clusterStore, err := clu.parseToStore(cluster)
+	if err != nil {
+		return err
+	}
+	if err := clu.CommonManager.Update(cluster.Name, clusterStore, -1, false); err != nil {
 		return err
 	}
 
@@ -33,11 +80,11 @@ func (clu *ClusterManager) Update(cluster *types.Cluster) error {
 }
 
 func (clu *ClusterManager) Get(name string) (*types.Cluster, error) {
-	clusterObj := types.Cluster{}
-	if err := clu.CommonManager.Get(name, &clusterObj); err != nil {
+	clusterStore := &types.ClusterStore{}
+	if err := clu.CommonManager.Get(name, clusterStore); err != nil {
 		return nil, err
 	}
-	return &clusterObj, nil
+	return clu.parseToCluster(clusterStore)
 }
 
 func (clu *ClusterManager) List(filters map[string]interface{}) ([]*types.Cluster, error) {
@@ -49,12 +96,21 @@ func (clu *ClusterManager) List(filters map[string]interface{}) ([]*types.Cluste
 	if err != nil {
 		return nil, err
 	}
-	var clus []*types.Cluster
+	var clus []*types.ClusterStore
 
 	if err := json.Unmarshal(jsonBody, &clus); err != nil {
 		return nil, err
 	}
-	return clus, nil
+
+	var clusters []*types.Cluster
+	for _, c := range clus {
+		cluster, err := clu.parseToCluster(c)
+		if err != nil {
+			return nil, err
+		}
+		clusters = append(clusters, cluster)
+	}
+	return clusters, nil
 }
 
 func (clu *ClusterManager) GetByToken(token string) (*types.Cluster, error) {
@@ -71,4 +127,18 @@ func (clu *ClusterManager) GetByToken(token string) (*types.Cluster, error) {
 		}
 	}
 	return nil, nil
+}
+
+func (clu *ClusterManager) HasMember(cluster *types.Cluster, user *types.User) bool {
+	// 不是超级用户且当前用户不在集群邀请之内
+	if user.IsSuper {
+		return true
+	}
+	if cluster.CreatedBy == user.Name {
+		return true
+	}
+	if utils.Contains(cluster.Members, user.Name) {
+		return true
+	}
+	return false
 }

@@ -5,28 +5,36 @@
           {{ t }}
         </el-breadcrumb-item>
     </el-breadcrumb>
-    <!-- <svg-icon class="icon-create" icon-class="create"/> -->
-    <!-- <svg-icon class="icon-create" icon-class="edit"/> -->
+    
     <el-link v-if="typeof addFunc !== 'undefined'" class="icon-create" @click="addFunc()"><svg-icon icon-class="add"/></el-link>
     <el-link v-if="typeof saveFunc !== 'undefined'" class="icon-create" @click="saveFunc()"><svg-icon icon-class="save"/></el-link>
     <span class="icon-create">
       
     </span>
     <div class="right">
+      <slot name="right-btn"></slot>
       <!-- <el-button v-if="typeof delFunc !== 'undefined'"  size="small" plain @click="delFunc()">删 除</el-button> -->
-      <el-button v-if="typeof delFunc !== 'undefined'" size="small" plain @click="delFunc()"
-        type="danger" icon="el-icon-delete" >
-         删除
-      </el-button>
-      <el-button v-if="typeof editFunc !== 'undefined'" size="small" plain @click="editFunc()"
-        type="success" icon='el-icon-edit'>
-        编辑
-      </el-button>
-      <el-button v-if="typeof createFunc !== 'undefined'" size="small" plain type="primary" @click="createFunc()"
-        icon="el-icon-plus">
-        {{ createDisplay }}
-      </el-button>
-      <!-- <el-button size="small" plain type="primary" @click="createFunc()" icon="el-icon-plus">创建</el-button> -->
+      <template v-if="$deletePerm()">
+        <el-button v-if="typeof delFunc !== 'undefined'" size="small" plain @click="delFunc()"
+          type="danger" icon="el-icon-delete" >
+          删除
+        </el-button>
+      </template>
+
+      <template v-if="$updatePerm()">
+        <el-button v-if="typeof editFunc !== 'undefined'" size="small" plain @click="editFunc()"
+          type="success" icon='el-icon-edit'>
+          编辑
+        </el-button>
+      </template>
+
+      <template v-if="$createPerm()">
+        <el-button v-if="typeof createFunc !== 'undefined'" size="small" plain type="primary" @click="createFunc()"
+          icon="el-icon-plus">
+          {{ createDisplay }}
+        </el-button>
+      </template>
+
       <el-select v-if="typeof nsFunc !== 'undefined'" v-model="nsInput" @change="nsChange" multiple placeholder="命名空间" size="small">
         <el-option
           v-for="item in namespaces"

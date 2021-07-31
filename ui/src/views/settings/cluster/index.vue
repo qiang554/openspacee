@@ -52,11 +52,19 @@
             <el-dropdown size="medium" >
               <el-link :underline="false"><svg-icon style="width: 1.3em; height: 1.3em;" icon-class="operate" /></el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="clusterConnectToken=scope.row.token; clusterConnectDialog = true" v-if="scope.row.status === 'Pending'">
-                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="link" />
-                  <span style="margin-left: 5px;">连接</span>
+                <template v-if="$updatePerm()">
+                  <el-dropdown-item @click.native.prevent="clusterConnectToken=scope.row.token; clusterConnectDialog = true" 
+                    v-if="scope.row.status === 'Pending'">
+                    <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="link" />
+                    <span style="margin-left: 5px;">连接</span>
+                  </el-dropdown-item>
+                </template>
+                <el-dropdown-item v-if="$updatePerm()" @click.native.prevent="createClusterFormVisible = true; inviteForm=true; 
+                  form={name: scope.row.name, members: scope.row.members}">
+                  <svg-icon style="width: 1.2em; height: 1.2em; line-height: 40px; vertical-align: -0.25em" icon-class="invite" />
+                  <span style="margin-left: 5px;">邀请</span>
                 </el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="deleteClusters([{name: scope.row.name}])">
+                <el-dropdown-item v-if="$deletePerm()" @click.native.prevent="deleteClusters([{name: scope.row.name}])">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em" icon-class="delete" />
                   <span style="margin-left: 5px;">删除</span>
                 </el-dropdown-item>
@@ -67,15 +75,26 @@
       </el-table>
     </div>
     <div>
-      <el-dialog title="创建集群" :visible.sync="createClusterFormVisible" :close-on-click-modal="false">
+      <el-dialog :title="inviteForm ? '邀请用户':'创建集群'" :visible.sync="createClusterFormVisible" :close-on-click-modal="false" 
+        :destroy-on-close="true" @close="form={'name': '', 'members': []}; inviteForm=false;">
         <el-form :model="form">
           <el-form-item label="集群名称">
-            <el-input v-model="form.name" autocomplete="off"></el-input>
+            <el-input v-model="form.name" :disabled="inviteForm" autocomplete="off" placeholder="请输入集群名称"></el-input>
+          </el-form-item>
+          <el-form-item label="邀请">
+            <el-select v-model="form.members" style="width: 100%" multiple filterable placeholder="请选择要邀请的用户">
+              <el-option
+                v-for="item in users"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name">
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="createClusterFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="handleCreateCluster">确 定</el-button>
+          <el-button @click="createClusterFormVisible = false; form={'name': '', 'members': []}; inviteForm=false;">取 消</el-button>
+          <el-button type="primary" @click="inviteForm ? handleClusterMembers() : handleCreateCluster();">确 定</el-button>
         </div>
       </el-dialog>
     </div>
@@ -105,7 +124,8 @@
 
 <script>
 import { Clusterbar } from '@/views/components'
-import { listCluster, createCluster, deleteCluster } from '@/api/cluster'
+import { listCluster, createCluster, deleteCluster, clusterMembers } from '@/api/cluster'
+import { getUser } from "@/api/user";
 import { Message } from 'element-ui'
 
 export default {
@@ -117,26 +137,28 @@ export default {
     return {
       titleName: ["Clusters"],
       search_name: '',
+      users: [],
       cellStyle: {border: 0},
       maxHeight: window.innerHeight - 150,
       loading: true,
       clusters: [],
       createClusterFormVisible: false,
+      inviteForm: false,
       clusterConnectDialog: false,
       clusterConnectToken: '',
       form: {
         name: '',
+        members: [],
       },
       locationAddr: window.location.origin,
     }
   },
   created() {
-    this.fetchData()
+    this.fetchData();
+    this.fetchUsers();
   },
   mounted() {
     const that = this
-    // let heightStyle = that.$refs.tableCot.offsetHeight
-    // that.maxHeight = heightStyle
     window.onresize = () => {
       return (() => {
         let heightStyle = window.innerHeight - 150
@@ -179,11 +201,16 @@ export default {
       listCluster()
         .then((response) => {
           this.loading = false
-          this.clusters = response.data
+          this.clusters = response.data || [];
         })
         .catch(() => {
           this.loading = false
         })
+    },
+    fetchUsers() {
+      getUser({}).then((response) => {
+        this.users = response.data;
+      });
     },
     nameSearch: function(val) {
       this.search_name = val
@@ -192,7 +219,6 @@ export default {
       this.createClusterFormVisible = true;
     },
     handleCreateCluster() {
-      console.log(this.form.name)
       if (!this.form.name) {
         Message.error('集群名称不能为空！')
         return
@@ -205,6 +231,24 @@ export default {
           this.fetchData()
           this.clusterConnectToken = response.data.token
           this.clusterConnectDialog = true;
+        })
+        .catch(() => {
+          // this.createClusterFormVisible = false
+          this.loading = false
+        })
+    },
+    handleClusterMembers() {
+      if (!this.form.name) {
+        Message.error('集群名称不能为空！')
+        return
+      }
+      clusterMembers(this.form)
+        .then((response) => {
+          Message.success("邀请用户成功")
+          this.createClusterFormVisible = false
+          this.inviteForm = false
+          this.loading = false
+          this.fetchData()
         })
         .catch(() => {
           // this.createClusterFormVisible = false

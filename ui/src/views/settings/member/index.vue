@@ -7,6 +7,7 @@
         :data="userData"
         class="table-fix"
         :cell-style="cellStyle"
+        :default-sort = "{prop: 'name'}"
         tooltip-effect="dark"
         style="width: 100%"
       >
@@ -25,6 +26,16 @@
           show-overflow-tooltip>
           <template slot-scope="scope">
             {{ scope.row.email ? scope.row.email : "—" }}
+          </template>
+        </el-table-column>
+        <el-table-column 
+          prop="roles" 
+          label="角色" 
+          show-overflow-tooltip>
+          <template slot-scope="scope">
+            <span v-for="val in scope.row.roles" :key="val" class="back-class">
+                {{ val }} 
+            </span>
           </template>
         </el-table-column>
         <el-table-column 
@@ -47,7 +58,14 @@
                 <svg-icon style="width: 1.3em; height: 1.3em" icon-class="operate"/>
               </el-link>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="deleteUsers([{ name: scope.row.name }])">
+                <el-dropdown-item v-if="$updatePerm()" 
+                  @click.native.prevent="createUserFormVisible=true; updateUserVisible=true;
+                                         form={name: scope.row.name, password: '', email: scope.row.email, roles: scope.row.roles}">
+                  <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em;"
+                    icon-class="edit"/>
+                  <span style="margin-left: 5px">修改</span>
+                </el-dropdown-item>
+                <el-dropdown-item v-if="$deletePerm()" @click.native.prevent="deleteUsers([{ name: scope.row.name }])">
                   <svg-icon style="width: 1.3em; height: 1.3em; line-height: 40px; vertical-align: -0.25em;"
                     icon-class="delete"/>
                   <span style="margin-left: 5px">删除</span>
@@ -59,29 +77,43 @@
       </el-table>
     </div>
 
-    <el-dialog title="创建用户" :visible.sync="createUserFormVisible">
-      <el-form :model="form">
-        <el-form-item label="用户名">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="form.password" autocomplete="off" placeholder="请输入密码" show-password>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="form.email" autocomplete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleCreateUser()">确 定</el-button>
+    <el-dialog :title="updateUserVisible ? '用户修改' : '创建用户'" :visible.sync="createUserFormVisible"
+      @close="form={'name': '', 'password': '', 'email': '', 'roles': []}; updateUserVisible = false; createUserFormVisible = false;">
+      <div style="padding: 10px 20px;">
+        <el-form :model="form" label-position="left" label-width="80px">
+          <el-form-item label="用户名">
+            <el-input :disabled="updateUserVisible" v-model="form.name" autocomplete="off" placeholder="请输入用户名"></el-input>
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="form.password" autocomplete="off" placeholder="请输入密码" show-password>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="邮箱">
+            <el-input v-model="form.email" autocomplete="off" placeholder="请输入邮箱"></el-input>
+          </el-form-item>
+          <el-form-item label="角色">
+            <el-select v-model="form.roles" multiple style="width: 100%;">
+              <el-option
+                v-for="item in roles"
+                :key="item.name"
+                :label="item.name"
+                :value="item.name">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
       </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="createUserFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="updateUserVisible ? handleUpdateUser() : handleCreateUser()">确 定</el-button>
+        </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import { Clusterbar } from "@/views/components";
 import { createUser, getUser, updateUser, deleteUser } from "@/api/user";
+import { getRoles } from "@/api/settings_role";
 import { Message } from "element-ui";
 
 export default {
@@ -99,6 +131,7 @@ export default {
       })();
     };
     this.handleGetUser();
+    this.handleGetRoles();
   },
   data() {
     return {
@@ -106,14 +139,17 @@ export default {
       cellStyle: { border: 0 },
       titleName: ["用户管理"],
       createUserFormVisible: false,
+      updateUserVisible: false,
       form: {
         name: "",
         email: "",
         password: "",
+        roles: [],
       },
       formLabelWidth: "120px",
       userData: [],
       search_name: "",
+      roles: [],
     };
   },
   filters: {
@@ -145,7 +181,6 @@ export default {
       console.log(index, row);
     },
     handleCreateUser() {
-      console.log(this.form.name, this.form.email, this.form.password);
       if (!this.form.name) {
         Message.error("用户名称不能为空！");
         return
@@ -160,6 +195,20 @@ export default {
       }
       createUser(this.form).then(() => {
         this.createUserFormVisible = false;
+        Message.success("创建成功")
+        this.handleGetUser()
+      }).catch((err) => {
+        console.log(err)
+      });
+    },
+    handleUpdateUser() {
+      if (!this.form.email) {
+        Message.error("邮箱不能为空！");
+        return
+      }
+      updateUser(this.form.name, this.form).then(() => {
+        this.createUserFormVisible = false;
+        Message.success("修改成功")
         this.handleGetUser()
       }).catch((err) => {
         console.log(err)
@@ -168,7 +217,12 @@ export default {
     handleGetUser(name) {
       getUser(name).then((response) => {
         this.userData = response.data;
-        console.log(this.userData);
+      });
+    },
+    handleGetRoles() {
+      getRoles().then((response) => {
+        this.roles = response.data;
+        this.roles.sort((a, b) => {return a.name > b.name ? 1 : -1});
       });
     },
     handleEnableUser(name, currentStatus) {
@@ -195,7 +249,7 @@ export default {
         Message.error('请选择要删除的用户')
         return
       }
-      deleteUser(delUsers).then((response) => {
+      deleteUser(delUsers).then(() => {
           this.handleGetUser()
       }).catch((e) => {
         console.log(e)

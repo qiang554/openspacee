@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/openspacee/osp/pkg/kube_resource"
 	"github.com/openspacee/osp/pkg/model"
+	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
 	"github.com/openspacee/osp/pkg/router/views/ws_views"
@@ -101,9 +102,9 @@ func apiWrapper(m *model.Models, handler views.ViewHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authRes := auth(m, c)
 		if !authRes.IsSuccess() {
-			c.JSON(200, authRes)
+			c.JSON(401, authRes)
 		} else {
-			context := &views.Context{Context: c, UserName: authRes.Data.(map[string]interface{})["name"].(string)}
+			context := &views.Context{Context: c, User: authRes.Data.(*types.User)}
 			res := handler(context)
 			c.JSON(200, res)
 		}
@@ -138,10 +139,7 @@ func auth(m *model.Models, c *gin.Context) *utils.Response {
 		resp.Msg = err.Error()
 		return &resp
 	}
-	resp.Data = map[string]interface{}{
-		"name":     u.Name,
-		"password": u.Password,
-	}
+	resp.Data = u
 	return &resp
 }
 
