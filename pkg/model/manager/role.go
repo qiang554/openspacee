@@ -6,6 +6,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/utils"
+	"k8s.io/klog"
 	"strings"
 )
 
@@ -118,14 +119,17 @@ func (r *RoleManager) InitRole(role *types.Role) error {
 	return nil
 }
 
-func (r *RoleManager) Init() error {
+func (r *RoleManager) Init() {
 	err := r.InitRole(types.AdminRole)
 	if err != nil {
-		return err
+		klog.Error("init admin role error: ", err)
 	}
 	err = r.InitRole(types.EditRole)
 	if err != nil {
-		return err
+		klog.Error("init edit role error: ", err)
 	}
-	return r.InitRole(types.ViewRole)
+	err = r.InitRole(types.ViewRole)
+	if err != nil {
+		klog.Error("init view role error: ", err)
+	}
 }

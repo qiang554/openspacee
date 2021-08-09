@@ -26,10 +26,7 @@ func NewRole(models *model.Models) *Role {
 		NewView(http.MethodPost, "/delete", role.delete),
 	}
 	role.Views = views
-	err := role.models.Init()
-	if err != nil {
-		klog.Errorf("Init role error: %v", err)
-	}
+	role.models.Init()
 	return role
 }
 
