@@ -3,33 +3,36 @@
     <clusterbar :titleName="titleName" :delFunc="deleteServiceAccounts" :editFunc="getServiceAccountYaml"/>
     <div class="dashboard-container" v-loading="loading">
 
-      <el-form label-position="left" class="pod-item" label-width="120px">
-        <el-form-item label="名称">
-          <span>{{ serviceaccount.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ serviceaccount.created }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ serviceaccount.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="Secrets">
-          <span>{{ getSecretsName(serviceaccount.secrets) }}</span>
-        </el-form-item>
-        <el-form-item label="标签">
-          <span v-if="!serviceaccount.labels">—</span>
-          <template v-else v-for="(val, key) in serviceaccount.labels" >
-            <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
-          </template>
-        </el-form-item>
-        <!-- <el-form-item label="注解">
-          <span v-if="!serviceaccount.annotations">——</span>
-          
-          <template v-else v-for="(val, key) in serviceaccount.annotations">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item> -->
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 30px 10px;">
+          <el-form-item label="名称">
+            <span>{{ serviceaccount.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ serviceaccount.created }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ serviceaccount.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="Secrets">
+            <span class="name-class" v-on:click="nameClick()">{{ getSecretsName(serviceaccount.secrets) }}</span>
+          </el-form-item>
+          <el-form-item label="标签">
+            <span v-if="!serviceaccount.labels">—</span>
+            <template v-else v-for="(val, key) in serviceaccount.labels" >
+              <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
+            </template>
+          </el-form-item>
+          <!-- <el-form-item label="注解">
+            <span v-if="!serviceaccount.annotations">——</span>
+            
+            <template v-else v-for="(val, key) in serviceaccount.annotations">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item> -->
+        </el-form>
+      </div>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -219,7 +222,12 @@ export default {
       var n = []
       for(let s of secrets) n.push(s.name)
       return n.join(",")
-    }
+    },
+    nameClick: function() {
+      let namespace = this.serviceaccount.namespace
+      let name = this.serviceaccount.secrets[0].name
+      this.$router.push({name: 'secretDetail', params: {namespace: namespace, secretName: name}})
+    },
   }
 }
 </script>

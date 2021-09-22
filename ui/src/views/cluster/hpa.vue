@@ -41,28 +41,28 @@
         <el-table-column
         prop="min_pods"
         label="Min Pods"
-        min-width="45"
+        min-width="25"
         show-overflow-tooltip
       >
       </el-table-column>
       <el-table-column
         prop="max_pods"
         label="Max Pods"
-        min-width="45"
+        min-width="25"
         show-overflow-tooltip
       >
       </el-table-column>
       <el-table-column
         prop="replicas"
         label="Replicas"
-        min-width="45"
+        min-width="25"
         show-overflow-tooltip
       >
       </el-table-column>
       <el-table-column
       prop="target_cpu_per"
       label="Target Cpu Per"
-      min-width="45"
+      min-width="35"
       show-overflow-tooltip
     >
     </el-table-column>

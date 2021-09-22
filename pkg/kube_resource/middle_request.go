@@ -17,7 +17,7 @@ type MiddleRequest struct {
 func NewMiddleRequest(cluster, resType, action string, params interface{}, timeout int64) *MiddleRequest {
 	requestId := utils.CreateUUID()
 	if timeout <= 0 {
-		timeout = 30
+		timeout = 120
 	}
 	return &MiddleRequest{
 		Cluster:   cluster,

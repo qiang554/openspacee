@@ -12,5 +12,6 @@ require (
 	github.com/jessevdk/go-assets-builder v0.0.0-20130903091706-b8483521738f // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/openspacee/ospagent v0.0.0-20201022022316-bf2790ba8ced
+	helm.sh/helm/v3 v3.6.3
 	k8s.io/klog v1.0.0
 )

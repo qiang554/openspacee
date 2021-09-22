@@ -2,57 +2,59 @@
   <div>
     <clusterbar :titleName="titleName" :delFunc="deleteServices" :editFunc="getServiceYaml"/>
     <div class="dashboard-container" v-loading="loading">
-
-      <el-form label-position="left" class="pod-item" label-width="120px">
-        <el-form-item label="名称">
-          <span>{{ service.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ service.created }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ service.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="类型">
-          <span>{{ service.type }}</span>
-        </el-form-item>
-        <el-form-item label="Cluster IP">
-          <span>{{ service.cluster_ip }}</span>
-        </el-form-item>
-        <el-form-item label="端口">
-          <template v-if="service.ports && service.ports.length > 0">
-            <span>{{ getPortsDisplay(service.ports) }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item label="Endpoints">
-          <template v-for="e of endpoints">
-            <span :key="e.name">{{ endpointsAddresses(e.subsets) }}</span>
-          </template>
-        </el-form-item>
-        <el-form-item label="会话亲和">
-          <span>{{ service.session_affinity }}</span>
-        </el-form-item>
-        <el-form-item label="选择器">
-          <template v-if="service.selector">
-            <span v-for="(val, key) in service.selector" :key="key" class="back-class">
-              {{ key + ': ' + val }} <br/>
-            </span>
-          </template>
-        </el-form-item>
-        <el-form-item label="标签">
-          <span v-if="!service.labels">——</span>
-          <template v-else v-for="(val, key) in service.labels" >
-            <span :key="key" class="back-class">{{key}}: {{val}} </span>
-          </template>
-        </el-form-item>
-        <!-- <el-form-item label="注解">
-          <span v-if="!service.annotations">——</span>
-          
-          <template v-else v-for="(val, key) in service.annotations">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item> -->
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 30px 10px;">
+          <el-form-item label="名称">
+            <span>{{ service.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ service.created }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ service.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="类型">
+            <span>{{ service.type }}</span>
+          </el-form-item>
+          <el-form-item label="Cluster IP">
+            <span>{{ service.cluster_ip }}</span>
+          </el-form-item>
+          <el-form-item label="端口">
+            <template v-if="service.ports && service.ports.length > 0">
+              <span>{{ getPortsDisplay(service.ports) }}</span>
+            </template>
+          </el-form-item>
+          <el-form-item label="Endpoints">
+            <template v-for="e of endpoints">
+              <span :key="e.name">{{ endpointsAddresses(e.subsets) }}</span>
+            </template>
+          </el-form-item>
+          <el-form-item label="会话亲和">
+            <span>{{ service.session_affinity }}</span>
+          </el-form-item>
+          <el-form-item label="选择器">
+            <template v-if="service.selector">
+              <span v-for="(val, key) in service.selector" :key="key" class="back-class">
+                {{ key + ': ' + val }} <br/>
+              </span>
+            </template>
+          </el-form-item>
+          <el-form-item label="标签">
+            <span v-if="!service.labels">——</span>
+            <template v-else v-for="(val, key) in service.labels" >
+              <span :key="key" class="back-class">{{key}}: {{val}} </span>
+            </template>
+          </el-form-item>
+          <!-- <el-form-item label="注解">
+            <span v-if="!service.annotations">——</span>
+            
+            <template v-else v-for="(val, key) in service.annotations">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item> -->
+        </el-form>
+      </div>
 
       <div style="padding: 0px 8px 0px 8px;" v-if="pods.length > 0">
         <div>Pods</div>
@@ -425,7 +427,7 @@ export default {
         pds += '/' + p.protocol
         pd.push(pds)
       }
-      return pd.join(',')
+      return pd.join(', ')
     },
     endpointsAddresses(subsets) {
       if (!subsets) return ''
@@ -441,7 +443,7 @@ export default {
           }
         }
       }
-      return as.join(',')
+      return as.join(', ')
     },
     deletePods: function(pods) {
       const cluster = this.$store.state.cluster
@@ -574,7 +576,7 @@ export default {
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  /* width: 50%; */
+  width: 100%;
 }
 /* .pod-item .el-form-item__content{
   float: left;

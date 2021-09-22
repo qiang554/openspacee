@@ -2,44 +2,47 @@
   <div>
     <clusterbar :titleName="titleName" :delFunc="deletePods" :editFunc="getPodYaml"/>
     <div class="dashboard-container">
-      <el-form label-position="left" inline class="pod-item">
-        <el-form-item label="状态">
-          <span>{{ pod.status }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ pod.created }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ pod.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="节点">
-          <span>{{ pod.node_name }}</span>
-        </el-form-item>
-        <el-form-item label="服务账户">
-          <span>{{ pod.service_account }}</span>
-        </el-form-item>
-        <el-form-item label="Pod IP">
-          <span>{{ pod.ip }}</span>
-        </el-form-item>
-        <el-form-item label="控制器">
-          <span>{{ pod.controlled }}/{{ pod.controlled_name}}</span>
-        </el-form-item>
-        <el-form-item label="QoS Class">
-          <span>{{ pod.qos }}</span>
-        </el-form-item>
-        <el-form-item label="标签">
-          <template v-for="(val, key) in pod.labels">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item>
-        <el-form-item label="注解">
-          <span v-if="!pod.annonations">—</span>
-          
-          <template v-else v-for="(val, key) in pod.annonations">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" inline class="pod-item" style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="状态">
+            <span>{{ pod.status }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ pod.created }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ pod.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="节点">
+            <span>{{ pod.node_name }}</span>
+          </el-form-item>
+          <el-form-item label="服务账户">
+            <span>{{ pod.service_account }}</span>
+          </el-form-item>
+          <el-form-item label="Pod IP">
+            <span>{{ pod.ip }}</span>
+          </el-form-item>
+          <el-form-item label="控制器">
+            <span>{{ pod.controlled }}/{{ pod.controlled_name}}</span>
+          </el-form-item>
+          <el-form-item label="QoS Class">
+            <span>{{ pod.qos }}</span>
+          </el-form-item>
+          <el-form-item label="标签">
+            <template v-for="(val, key) in pod.labels">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item>
+          <el-form-item label="注解">
+            <span v-if="!pod.annonations">—</span>
+            
+            <template v-else v-for="(val, key) in pod.annonations">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <el-tabs value="containers" style="padding: 0px 8px;">
         <el-tab-pane label="容器" name="containers">

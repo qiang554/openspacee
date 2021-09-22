@@ -200,7 +200,7 @@ export default {
     .no-redirect {
       // color: #97a8be;
       cursor: text;
-      font-size: 23px;
+      font-size: 21px;
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
     }
     .no-redirect:first-child {

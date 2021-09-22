@@ -2,56 +2,69 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getConfigMapYaml" />
     <div class="dashboard-container">
-      <el-form label-position="left" class="pod-item" v-if="configMap.metadata">
-        <el-form-item label="名称">
-          <span>{{ configMap.metadata.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ configMap.metadata.creationTimestamp }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ configMap.metadata.namespace }}</span>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" v-if="configMap.metadata" style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="名称">
+            <span>{{ configMap.metadata.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ configMap.metadata.creationTimestamp }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ configMap.metadata.namespace }}</span>
+          </el-form-item>
 
-      <div class="msgClass">
-        <el-table
-          v-if="configData"
-          :data="configData"
-          class="table-fix"
-          tooltip-effect="dark"
-          style="width: 100%"
-          :cell-style="cellStyle"
-          :default-sort = "{prop: 'lastProbeTime'}"
-          >
-          <el-table-column
-            prop="key"
-            label="键"
-            min-width="30"
-            show-overflow-tooltip>
-            <template slot-scope={row}>
-              <el-input placeholder="请输入内容" v-model="row.key"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="value"
-            label="值"
-            min-width="80"
-            show-overflow-tooltip>
-            <template slot-scope={row}>
-              <el-input placeholder="请输入内容" v-model="row.value"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" min-width="20" fixed="right" align="center">
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                type="danger"
-                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无数据</div>
+          <el-form-item label="标签">
+            <span v-if="!configMap.metadata.labels">—</span>
+            <div v-else v-for="(val, key) in configMap.metadata.labels" :key="key" >
+              <span :key="key" class="back-class">{{key}}:{{val}}</span> <br/>
+            </div>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <div style="padding: 10px 8px 0px;">
+        <div>数据</div>
+        <div class="msgClass" style="margin-top: 15px;">
+          <el-table
+            v-if="configData"
+            :data="configData"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'lastProbeTime'}"
+            >
+            <el-table-column
+              prop="key"
+              label="键"
+              min-width="30"
+              show-overflow-tooltip>
+              <template slot-scope={row}>
+                <el-input placeholder="请输入内容" v-model="row.key"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="value"
+              label="值"
+              min-width="80"
+              show-overflow-tooltip>
+              <template slot-scope={row}>
+                <el-input placeholder="请输入内容" v-model="row.value"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" min-width="20" fixed="right" align="center">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无数据</div>
+        </div>
       </div>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
@@ -304,7 +317,7 @@ export default {
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  width: 33%;
+  width: 60%;
 }
 .pod-item span {
   color: #606266;

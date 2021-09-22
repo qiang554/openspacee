@@ -2,38 +2,80 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getSecretYaml" />
     <div class="dashboard-container">
-      <el-form label-position="left" class="pod-item" label-width="180px" v-if="secret.metadata">
-        <el-form-item label="名称">
-          <span>{{ secret.metadata.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ secret.metadata.creationTimestamp }}</span>
-        </el-form-item>
-        <el-form-item label="Namespace">
-          <span>{{ secret.metadata.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="Type">
-          <span>{{ secret.type }}</span>
-        </el-form-item>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" v-if="secret.metadata" style="margin: 15px 10px 20px 10px; width: 100%">
+          <el-form-item label="名称">
+            <span>{{ secret.metadata.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ secret.metadata.creationTimestamp }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ secret.metadata.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="类型">
+            <span>{{ secret.type }}</span>
+          </el-form-item>
 
-        <el-form-item label="Labels">
-          <span v-if="!secret.metadata.labels">——</span>
-          <template v-else v-for="(key, val) in secret.metadata.labels" >
-            <span :key="key" class="back-class">{{key}}:{{val}}<br/></span>
-          </template>
-        </el-form-item>
+          <el-form-item label="标签">
+            <span v-if="!secret.metadata.labels">—</span>
+            <template v-else v-for="(key, val) in secret.metadata.labels" >
+              <span :key="key" class="back-class">{{key}}:{{val}}<br/></span>
+            </template>
+          </el-form-item>
+        </el-form>
+      </div>
 
-        <el-form-item label="Annotations">
-          <span v-if="!secret.metadata.annotations">——</span>
-          <template v-else v-for="(key, val) in secret.metadata.annotations" >
-            <span :key="key" class="back-class">{{key}}:{{val}}<br/></span>
-          </template>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>数据</div>
+        <div class="msgClass" style="margin-top: 15px;">
+          <el-table
+            v-if="secretData"
+            :data="secretData"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'lastProbeTime'}"
+            >
+            <el-table-column
+              prop="key"
+              label="键"
+              min-width="30"
+              show-overflow-tooltip>
+              <template slot-scope={row}>
+                <el-input placeholder="" v-model="row.key"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="value"
+              label="值"
+              min-width="90"
+              show-overflow-tooltip>
+              <template slot-scope={row}>
+                <el-input type="textarea" placeholder="" v-model="row.value"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" min-width="20" align="center">
+              <template slot-scope="scope">
+
+                <el-button type="primary" size="mini" 
+                  @click="getSecret(scope.row)">
+                  {{ scope.row.decode ? '隐藏' : '显示' }}
+                </el-button>
+                <!-- <el-button size="mini" type="danger"
+                  @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
+              </template>
+            </el-table-column>
+          </el-table>
+          <div v-else style="padding: 25px 15px ; color: #909399; text-align: center">暂无数据</div>
+        </div>
+      </div>
 
       <!-- <el-collapse v-model="activeNames" @change="handleChange">
         <el-collapse-item title="Data" name="1" v-if="secret.data"> -->
-          <div v-for="(key, val) in secret.data" :key="val" class="msgClass" >
+          <!-- <div v-for="(key, val) in secret.data" :key="val" class="msgClass" >
             <div class="dataDiv">
               <div>{{val}}
                 <el-button type="text" icon="el-icon-view" circle size="mini" @click.once="getSecretDisplay(key,val)"></el-button>
@@ -42,7 +84,7 @@
             <el-input type="textarea"  :autosize='{ minRows: 2, maxRows: 4 }' readonly v-model="secret.data[val]">
               <i slot="suffix" class="el-input__icon el-icon-date"></i>
             </el-input>
-          </div>
+          </div> -->
         <!-- </el-collapse-item>
 
       </el-collapse> -->
@@ -99,17 +141,34 @@ export default {
       return this.$store.state.cluster
     },
     secret: function() {
-      console.log(this.originSecret)
       return this.originSecret
     },
     namespace: function() {
       return this.$route.params ? this.$route.params.namespace : ""
-    }
+    },
+    secretData: function() {
+      if (!this.originSecret.data) return []
+      let d = this.originSecret.data
+      let dataTable = []
+      Object.keys(d).forEach(key => {
+      dataTable.push({
+          key: key,
+          value: d[key],
+          decode: false
+        })
+      })
+      return dataTable
+    },
   },
   methods: {
-    getSecretDisplay(key,val) {
-      var res = Base64.decode(key)
-      this.secret.data[val] = res
+    getSecret(row) {
+      if(row.decode) {
+        var res = Base64.encode(row.value)
+      } else {
+        var res = Base64.decode(row.value)
+      }
+      row['value'] = res
+      row['decode'] = !row['decode']
     },
     handleChange(val) {
         console.log(val);

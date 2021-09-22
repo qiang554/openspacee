@@ -2,26 +2,29 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getNodeYaml" />
     <div class="dashboard-container" v-loading="loading" v-if="node">
-      <el-form label-position="left" class="pod-item" label-width="120px">
-        <el-form-item label="名称">
-          <span>{{ node.metadata.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ node.metadata.creationTimestamp }}</span>
-        </el-form-item>
-        <el-form-item label="IP地址">
-          <span>{{ nodeInternalIp(node) }}</span>
-        </el-form-item>
-        <el-form-item label="版本">
-          <span>{{ node.status.nodeInfo.kubeletVersion }}</span>
-        </el-form-item>
-        <el-form-item label="操作系统">
-          <span>{{ node.status.nodeInfo.osImage }}</span>
-        </el-form-item>
-        <el-form-item label="容器运行时">
-          <span>{{ node.status.nodeInfo.containerRuntimeVersion }}</span>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="名称">
+            <span>{{ node.metadata.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ node.metadata.creationTimestamp }}</span>
+          </el-form-item>
+          <el-form-item label="IP地址">
+            <span>{{ nodeInternalIp(node) }}</span>
+          </el-form-item>
+          <el-form-item label="版本">
+            <span>{{ node.status.nodeInfo.kubeletVersion }}</span>
+          </el-form-item>
+          <el-form-item label="操作系统">
+            <span>{{ node.status.nodeInfo.osImage }}</span>
+          </el-form-item>
+          <el-form-item label="容器运行时">
+            <span>{{ node.status.nodeInfo.containerRuntimeVersion }}</span>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <el-tabs value="conditions" style="padding: 0px 8px;">
         <el-tab-pane label="状态" name="conditions">
@@ -109,7 +112,7 @@
         </el-tab-pane>
         <el-tab-pane label="信息" name="nodeInfo">
           <div class="msgClass">
-            <el-form label-position="left" class="pod-item" label-width="180px">
+            <el-form label-position="left" class="pod-item" label-width="180px" style="box-shadow: 0 0 0 0; margin-top: 0px;">
               <template v-for="(val, key) in node.status.nodeInfo">
                 <el-form-item :label="key" :key="key">
                   <span>{{ val }}</span>

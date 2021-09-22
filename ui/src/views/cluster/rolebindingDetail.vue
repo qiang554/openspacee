@@ -3,41 +3,44 @@
     <clusterbar :titleName="titleName" :delFunc="deleteRoleBindings" :editFunc="getRoleBindingYaml"/>
     <div class="dashboard-container" v-loading="loading">
 
-      <el-form label-position="left" class="pod-item" label-width="120px">
-        <el-form-item label="名称">
-          <span>{{ rolebinding.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ rolebinding.created }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ rolebinding.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="角色">
-          <span>{{ rolebinding.role.kind + '/' + rolebinding.role.name }}</span>
-        </el-form-item>
-        <el-form-item label="绑定主体">
-          <span v-for="s of rolebinding.subjects" :key="s.name" class="back-class">
-            {{ s.kind + '/' + s.name }}<br/>
-          </span>
-        </el-form-item>
-        <!-- <el-form-item label="Secrets">
-          <span>{{ getSecretsName(rolebinding.secrets) }}</span>
-        </el-form-item> -->
-        <el-form-item label="标签">
-          <span v-if="!rolebinding.labels">—</span>
-          <template v-else v-for="(val, key) in rolebinding.labels" >
-            <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
-          </template>
-        </el-form-item>
-        <!-- <el-form-item label="注解">
-          <span v-if="!rolebinding.annotations">—</span>
-          
-          <template v-else v-for="(val, key) in rolebinding.annotations">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item> -->
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 30px 10px;">
+          <el-form-item label="名称">
+            <span>{{ rolebinding.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ rolebinding.created }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ rolebinding.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="角色">
+            <span>{{ rolebinding.role.kind + '/' + rolebinding.role.name }}</span>
+          </el-form-item>
+          <el-form-item label="绑定主体">
+            <span v-for="s of rolebinding.subjects" :key="s.name" class="back-class">
+              {{ s.kind + '/' + s.name }}<br/>
+            </span>
+          </el-form-item>
+          <!-- <el-form-item label="Secrets">
+            <span>{{ getSecretsName(rolebinding.secrets) }}</span>
+          </el-form-item> -->
+          <el-form-item label="标签">
+            <span v-if="!rolebinding.labels">—</span>
+            <template v-else v-for="(val, key) in rolebinding.labels" >
+              <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
+            </template>
+          </el-form-item>
+          <!-- <el-form-item label="注解">
+            <span v-if="!rolebinding.annotations">—</span>
+            
+            <template v-else v-for="(val, key) in rolebinding.annotations">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item> -->
+        </el-form>
+      </div>
       
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>

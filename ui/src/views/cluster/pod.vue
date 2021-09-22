@@ -77,7 +77,7 @@
         <el-table-column
           prop="created"
           label="创建时间"
-          min-width="140"
+          min-width="135"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -85,6 +85,9 @@
           label="状态"
           min-width="60"
           show-overflow-tooltip>
+          <template slot-scope="scope">
+            <span :class="podStatusClass(scope.row.status)" style="font-weight: 450">{{ scope.row.status }}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label=""
@@ -322,6 +325,13 @@ export default {
         this.delFunc = undefined
       }
       // this.multipleSelection = val;
+    },
+    podStatusClass(status) {
+      if(status=='Running') return 'running-class'
+      if(status=='Pending') return 'waiting-class'
+      if(status=='Succeeded') return 'succeeded-class'
+      if(status=='Failed') return 'error-class'
+      if(status=='Unknown') return 'terminate-class'
     }
   }
 }
@@ -370,6 +380,14 @@ export default {
 
 .waiting-class {
   color: #E6A23C;
+}
+
+.error-class {
+  color: #F56C6C;
+}
+
+.succeeded-class {
+  color: #409EFF;
 }
 </style>
 

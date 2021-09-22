@@ -2,45 +2,49 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getPersistentVolumeYaml" />
     <div class="dashboard-container">
-      <el-form label-position="left" class="pod-item" label-width="120px" v-if="persistentVolume.metadata">
-        <el-form-item label="名称">
-          <span>{{ persistentVolume.metadata.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ persistentVolume.metadata.creationTimestamp }}</span>
-        </el-form-item>
-        <el-form-item label="状态">
-          <span>{{ persistentVolume.status.phase }}</span>
-        </el-form-item>
-        <el-form-item label="容量">
-          <span>{{ persistentVolume.spec.capacity.storage }}</span>
-        </el-form-item>
-        <el-form-item label="访问模式">
-          <template v-for="key in persistentVolume.spec.accessModes" >
-            <span :key="key" class="back-class">{{key}} <br/></span>
-          </template>
-        </el-form-item>
-        <el-form-item label="存储声明">
-          <span v-if="persistentVolume.spec.claimRef">
-            {{ persistentVolume.spec.claimRef.namespace + '/' + persistentVolume.spec.claimRef.name }}
-          </span>
-        </el-form-item>
-        <el-form-item label="存储类">
-          <span>{{ persistentVolume.spec.storageClassName }}</span>
-        </el-form-item>
-        <el-form-item label="存储类型">
-          <span>{{ persistentVolume.spec.volumeMode }}</span>
-        </el-form-item>
-        <el-form-item label="重声明策略">
-          <span>{{ persistentVolume.spec.persistentVolumeReclaimPolicy }}</span>
-        </el-form-item>
-        <el-form-item label="标签">
-          <span v-if="!persistentVolume.metadata.labels">——</span>
-          <template v-else v-for="(val, key) in persistentVolume.metadata.labels" >
-            <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
-          </template>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" v-if="persistentVolume.metadata"
+        style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="名称">
+            <span>{{ persistentVolume.metadata.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ persistentVolume.metadata.creationTimestamp }}</span>
+          </el-form-item>
+          <el-form-item label="状态">
+            <span>{{ persistentVolume.status.phase }}</span>
+          </el-form-item>
+          <el-form-item label="容量">
+            <span>{{ persistentVolume.spec.capacity.storage }}</span>
+          </el-form-item>
+          <el-form-item label="访问模式">
+            <template v-for="key in persistentVolume.spec.accessModes" >
+              <span :key="key" class="back-class">{{key}} <br/></span>
+            </template>
+          </el-form-item>
+          <el-form-item label="存储声明">
+            <span v-if="persistentVolume.spec.claimRef">
+              {{ persistentVolume.spec.claimRef.namespace + '/' + persistentVolume.spec.claimRef.name }}
+            </span>
+          </el-form-item>
+          <el-form-item label="存储类">
+            <span>{{ persistentVolume.spec.storageClassName }}</span>
+          </el-form-item>
+          <el-form-item label="存储类型">
+            <span>{{ persistentVolume.spec.volumeMode }}</span>
+          </el-form-item>
+          <el-form-item label="重声明策略">
+            <span>{{ persistentVolume.spec.persistentVolumeReclaimPolicy }}</span>
+          </el-form-item>
+          <el-form-item label="标签">
+            <span v-if="!persistentVolume.metadata.labels">——</span>
+            <template v-else v-for="(val, key) in persistentVolume.metadata.labels" >
+              <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
+            </template>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <el-tabs value="back" style="padding: 0px 8px;">
         <el-tab-pane label="后端存储" name="back">
@@ -60,7 +64,7 @@
                   <el-table-column
                     prop="key"
                     label="键"
-                    min-width="50"
+                    min-width="20"
                     show-overflow-tooltip>
                   </el-table-column>
                   <el-table-column
@@ -366,7 +370,7 @@ export default {
 .pod-item .el-form-item {
   margin-right: 0;
   margin-bottom: 0;
-  width: 33%;
+  width: 100%;
 }
 .pod-item span {
   color: #606266;

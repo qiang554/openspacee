@@ -2,44 +2,50 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getPersistentVolumeClaimYaml" />
     <div class="dashboard-container" v-loading="loading">
-      <el-form label-position="left" class="pod-item" label-width="120px">
-        <el-form-item label="名称">
-          <span>{{ PersistentVolumeClaim.metadata.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ PersistentVolumeClaim.metadata.creationTimestamp }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ PersistentVolumeClaim.metadata.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="状态">
-          <span>{{ PersistentVolumeClaim.status.phase }}</span>
-        </el-form-item>
-        <el-form-item label="容量">
-          <span>{{ PersistentVolumeClaim.spec.resources.requests.storage }}</span>
-        </el-form-item>
-        <el-form-item label="存储卷">
-          <span>{{ PersistentVolumeClaim.spec.volumeName }}</span>
-        </el-form-item>
-        <el-form-item label="存储类">
-          <span v-if="!PersistentVolumeClaim.spec.storageClassName">—</span>
-          <span v-else>{{ PersistentVolumeClaim.spec.storageClassName }}</span>
-        </el-form-item>
-        <el-form-item label="访问模式">
-          <template v-for="key in PersistentVolumeClaim.spec.accessModes" >
-            <span :key="key" class="back-class">{{key}} <br/></span>
-          </template>
-        </el-form-item>
-        <el-form-item label="存储类型">
-          <span>{{ PersistentVolumeClaim.spec.volumeMode }}</span>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" v-if="PersistentVolumeClaim"
+        style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="名称">
+            <span>{{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.metadata.name : '' }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.metadata.creationTimestamp : '' }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.metadata.namespace : '' }}</span>
+          </el-form-item>
+          <el-form-item label="状态">
+            <span>{{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.status.phase : '' }}</span>
+          </el-form-item>
+          <el-form-item label="容量">
+            <span>{{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.spec.resources.requests.storage : '' }}</span>
+          </el-form-item>
+          <el-form-item label="存储卷">
+            <span class="name-class" v-on:click="nameClick()">
+              {{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.spec.volumeName : '' }}
+            </span>
+          </el-form-item>
+          <el-form-item label="存储类">
+            <span v-if="PersistentVolumeClaim.metadata && !PersistentVolumeClaim.spec.storageClassName">—</span>
+            <span v-else>{{ PersistentVolumeClaim.metadata ? PersistentVolumeClaim.spec.storageClassName : '' }}</span>
+          </el-form-item>
+          <el-form-item label="访问模式" v-if="PersistentVolumeClaim.metadata" >
+            <template v-for="key in PersistentVolumeClaim.spec.accessModes" >
+              <span :key="key" class="back-class">{{key}} <br/></span>
+            </template>
+          </el-form-item>
+          <el-form-item label="存储类型" v-if="PersistentVolumeClaim.metadata" >
+            <span>{{ PersistentVolumeClaim.spec.volumeMode }}</span>
+          </el-form-item>
+        </el-form>
+      </div>
 
-      <el-tabs value="resource" style="padding: 0px 8px;">
+      <el-tabs value="resource" style="padding: 0px 8px;" v-if="PersistentVolumeClaim.metadata">
         <el-tab-pane label="资源要求" name="resource">
           <div class="msgClass">
             <div v-if="PersistentVolumeClaim.spec.resources">
-              <el-form label-position="left" class="pod-item" label-width="150px">
+              <el-form label-position="left" class="pod-item" style="box-shadow: 0 0 0 0;" label-width="150px">
                 <el-form-item label="Requests">
                   <span v-if="!PersistentVolumeClaim.spec.resources.requests">—</span>
                   <template v-else v-for="(val, key) in PersistentVolumeClaim.spec.resources.requests">
@@ -59,7 +65,7 @@
         </el-tab-pane>
         <el-tab-pane label="选择器" name="selector">
           <div class="msgClass">
-            <el-form label-position="left" class="pod-item" label-width="150px">
+            <el-form label-position="left" class="pod-item" style="box-shadow: 0 0 0 0;" label-width="150px">
               <el-form-item label="Match Labels">
                 <span v-if="!PersistentVolumeClaim.spec.selector || !PersistentVolumeClaim.spec.selector.matchLabels">—</span>
                 <template v-else v-for="(val, key) in PersistentVolumeClaim.spec.selector.matchLabels">
@@ -198,6 +204,11 @@ export default {
     }
   },
   methods: {
+    nameClick() {
+      if (this.PersistentVolumeClaim.spec && this.PersistentVolumeClaim.spec.volumeName) {
+        this.$router.push({name: "pvDetail", params: { persistentVolumeName: this.PersistentVolumeClaim.spec.volumeName },});
+      }
+    },
     handleChange(val) {
         console.log(val);
     },
@@ -365,7 +376,7 @@ export default {
 .item-class  */
 
 .pod-item {
-  margin: 20px 5px 30px 5px;
+  margin: 0px 5px 30px 5px;
   padding: 10px 20px;
   font-size: 0;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);

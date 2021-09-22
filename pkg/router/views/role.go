@@ -26,7 +26,7 @@ func NewRole(models *model.Models) *Role {
 		NewView(http.MethodPost, "/delete", role.delete),
 	}
 	role.Views = views
-	role.models.Init()
+	role.models.RoleManager.Init()
 	return role
 }
 

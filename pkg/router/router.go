@@ -8,6 +8,7 @@ import (
 	"github.com/openspacee/osp/pkg/model/types"
 	"github.com/openspacee/osp/pkg/redis"
 	"github.com/openspacee/osp/pkg/router/views"
+	"github.com/openspacee/osp/pkg/router/views/kube_views"
 	"github.com/openspacee/osp/pkg/router/views/ws_views"
 	"github.com/openspacee/osp/pkg/utils"
 	"github.com/openspacee/osp/pkg/utils/code"
@@ -31,20 +32,14 @@ func NewRouter(redisOptions *redis.Options) *Router {
 
 	indexHtml, _ := ioutil.ReadAll(Assets.Files["/index.html"])
 	t, _ := template.New("").New("/index.html").Parse(string(indexHtml))
-	//engine.LoadHTMLFiles("ui/dist/index.html")
 	engine.SetHTMLTemplate(t)
-	//engine.StaticFS("/static", http.Dir("ui/dist/static"))
 	engine.StaticFS("/static", Assets)
 	engine.StaticFile("/favicon.ico", "./favicon.ico")
-	//a := Assets.Dirs["/ui/dist/static"]
-	//fullName := filepath.Join("ui/dist/static", filepath.FromSlash(path.Clean("/"+"css/index.html")))
-	//klog.Info(fullName)
+
 	engine.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "/index.html", nil)
 	})
-	//engine.GET("/ui/login", func(c *gin.Context) {
-	//	c.HTML(http.StatusOK, "index.html", nil)
-	//})
+
 	engine.GET("/ui/*path", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "/index.html", nil)
 	})
@@ -92,6 +87,9 @@ func NewRouter(redisOptions *redis.Options) *Router {
 	// 连接log websocket接口
 	logWs := ws_views.NewLogWs(redisOptions, models, kubeResources)
 	engine.GET("/ws/log/:cluster/:namespace/:pod", logWs.Connect)
+
+	helmView := kube_views.NewHelm(kubeResources, models)
+	engine.GET("/app/charts/:name/:chart_version", helmView.GetAppChart)
 
 	return &Router{
 		Engine: engine,

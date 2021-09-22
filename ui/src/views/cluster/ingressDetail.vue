@@ -2,39 +2,41 @@
   <div>
     <clusterbar :titleName="titleName" :delFunc="deleteIngresses" :editFunc="getIngressYaml"/>
     <div class="dashboard-container" v-loading="loading">
-
-      <el-form label-position="left" class="pod-item" label-width="120px">
-        <el-form-item label="名称">
-          <span>{{ ingress.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ ingress.created }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ ingress.namespace }}</span>
-        </el-form-item>
-        <el-form-item v-if="ingress.backend" label="默认后端">
-          <span>{{ ingress.backend.serviceName + ':' + ingress.backend.servicePort }}</span>
-        </el-form-item>
-        <el-form-item label="标签">
-          <span v-if="!ingress.labels">—</span>
-          <template v-else v-for="(val, key) in ingress.labels" >
-            <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
-          </template>
-        </el-form-item>
-        <el-form-item label="注解">
-          <span v-if="!ingress.annotations">—</span>
-          
-          <template v-else v-for="(val, key) in ingress.annotations">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="名称">
+            <span>{{ ingress.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ ingress.created }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ ingress.namespace }}</span>
+          </el-form-item>
+          <el-form-item v-if="ingress.backend" label="默认后端">
+            <span>{{ ingress.backend.serviceName + ':' + ingress.backend.servicePort }}</span>
+          </el-form-item>
+          <el-form-item label="标签">
+            <span v-if="!ingress.labels">—</span>
+            <template v-else v-for="(val, key) in ingress.labels" >
+              <span :key="key" class="back-class">{{key}}: {{val}} <br/></span>
+            </template>
+          </el-form-item>
+          <el-form-item label="注解">
+            <span v-if="!ingress.annotations">—</span>
+            
+            <template v-else v-for="(val, key) in ingress.annotations">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <el-tabs value="rules" style="padding: 0px 8px;">
         <el-tab-pane label="路由规则" name="rules">
           <div v-for="r of ingress.rules" :key="r.host">
-            <div style="margin: 10px 10px 0px 10px">
+            <div style="margin: 5px 10px 0px 2px">
               <span style="color: #606266; font-size: 14px; margin-left: 10px;"><b>主机域名： {{ r.host }}</b></span>
             </div>
             <div class="msgClass" style="margin: 5px 10px 30px 10px;">
@@ -65,7 +67,7 @@
                   show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>
-                      {{ scope.row.backend.service.name }}
+                      {{ scope.row.backend.serviceName }}
                     </span>
                   </template>
                 </el-table-column>
@@ -76,7 +78,7 @@
                   show-overflow-tooltip>
                   <template slot-scope="scope">
                     <span>
-                      {{ scope.row.backend.service.port.number }}
+                      {{ scope.row.backend.servicePort }}
                     </span>
                   </template>
                 </el-table-column>

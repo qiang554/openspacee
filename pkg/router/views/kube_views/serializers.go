@@ -15,6 +15,20 @@ type GetSerializers struct {
 	Namespace string `json:"namespace" form:"namespace"`
 	Output    string `json:"output" form:"output"`
 	Kind      string `json:"kind" form:"kind"`
+	GetOption string `json:"get_option" form:"get_option"`
+}
+
+type GetAppSerializers struct {
+	Name         string `json:"name" form:"name"`
+	ChartVersion string `json:"chart_version" form:"chart_version"`
+}
+
+type CreateAppSerializers struct {
+	Name         string                 `json:"name" form:"name"`
+	Namespace    string                 `json:"namespace" form:"namespace"`
+	ChartVersion string                 `json:"chart_version"`
+	ReleaseName  string                 `json:"release_name"`
+	Values       map[string]interface{} `json:"values"`
 }
 
 type DeleteResource struct {

@@ -26,6 +26,28 @@ const Routes = [
   },
 
   {
+    path: 'app',
+    name: 'app',
+    component: () => import('@/views/cluster/app'),
+    meta: { title: '应用', icon: 'app', group: 'cluster', object: "app" },
+  },
+
+  {
+    path: 'appCreate',
+    name: 'appCreate',
+    hidden: true,
+    component: () => import('@/views/cluster/appCreate'),
+    meta: { title: '应用', icon: 'app', group: 'cluster', sideName: 'app', object: "app" },
+  },
+  {
+    path: 'app/:namespace/:appName',
+    name: 'appDetail',
+    hidden: true,
+    component: () => import('@/views/cluster/appDetail'),
+    meta: { title: '容器组', icon: 'app', group: 'cluster', sideName: 'app', object: 'app' },
+  },
+
+  {
     path: 'workloads',
     component: Noop,
     name: 'workloads',

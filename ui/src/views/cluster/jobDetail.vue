@@ -2,55 +2,59 @@
   <div>
     <clusterbar :titleName="titleName" :delFunc="deleteJobs" :editFunc="getJobYaml"/>
     <div class="dashboard-container">
-      <el-form label-position="left" inline class="pod-item">
-        <el-form-item label="名称">
-          <span>{{ job.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ job.created }}</span>
-        </el-form-item>
-        <el-form-item label="命名空间">
-          <span>{{ job.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="Completions">
-          <span>{{ job.completions }}</span>
-        </el-form-item>
-        <el-form-item label="Pods">
-          <!-- <span>{{ job.number_ready + "/" + job.desired_number_scheduled }}</span> -->
-          <span v-if="job.active > 0" class="back-class">
-            {{ job.active }} Running
-          </span>
-          <span v-if="job.succeeded > 0" class="back-class">
-            {{ job.succeeded }} Succeeded
-          </span>
-          <span v-if="job.failed > 0" class="back-class">
-            {{ job.failed }} Failed
-          </span>
-        </el-form-item>
-        <el-form-item label="选择器">
-          <span v-if="!job.label_selector">—</span>
-          <template v-else v-for="(val, key) in job.label_selector.matchLabels">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item>
-        <el-form-item label="标签">
-          <span v-if="!job.labels">—</span>
-          <template v-else v-for="(val, key) in job.labels">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item>
-        <!-- <el-form-item label="注解">
-          <span v-if="!job.annotations">—</span>
-          
-          <template v-else v-for="(val, key) in job.annotations">
-            <span :key="key">{{key}}: {{val}}<br/></span>
-          </template>
-        </el-form-item> -->
-      </el-form>
+
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" inline class="pod-item" style="margin: 15px 10px 30px 10px;">
+          <el-form-item label="名称">
+            <span>{{ job.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ job.created }}</span>
+          </el-form-item>
+          <el-form-item label="命名空间">
+            <span>{{ job.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="Completions">
+            <span>{{ job.completions }}</span>
+          </el-form-item>
+          <el-form-item label="Pods">
+            <!-- <span>{{ job.number_ready + "/" + job.desired_number_scheduled }}</span> -->
+            <span v-if="job.active > 0" class="back-class">
+              {{ job.active }} Running
+            </span>
+            <span v-if="job.succeeded > 0" class="back-class">
+              {{ job.succeeded }} Succeeded
+            </span>
+            <span v-if="job.failed > 0" class="back-class">
+              {{ job.failed }} Failed
+            </span>
+          </el-form-item>
+          <el-form-item label="选择器">
+            <span v-if="!job.label_selector">—</span>
+            <template v-else v-for="(val, key) in job.label_selector.matchLabels">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item>
+          <el-form-item label="标签">
+            <span v-if="!job.labels">—</span>
+            <template v-else v-for="(val, key) in job.labels">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item>
+          <!-- <el-form-item label="注解">
+            <span v-if="!job.annotations">—</span>
+            
+            <template v-else v-for="(val, key) in job.annotations">
+              <span :key="key">{{key}}: {{val}}<br/></span>
+            </template>
+          </el-form-item> -->
+        </el-form>
+      </div>
 
       <div style="padding: 0px 8px;">
         <div>Pods</div>
-        <div class="msgClass" style="margin: 15px 10px 30px 10px;">
+        <div class="msgClass" style="margin: 15px 10px 20px 10px;">
           <el-table
             ref="table"
             :data="pods"

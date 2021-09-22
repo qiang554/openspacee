@@ -10,6 +10,7 @@ type Models struct {
 	*manager.UserManager
 	*manager.TokenManager
 	*manager.RoleManager
+	*manager.AppManager
 }
 
 func NewModels(redisOp *redis.Options) *Models {
@@ -18,11 +19,13 @@ func NewModels(redisOp *redis.Options) *Models {
 	role := manager.NewRoleManager(client)
 	user := manager.NewUserManager(client, role)
 	tk := manager.NewTokenManager(client)
+	app := manager.NewAppManager(client)
 
 	return &Models{
 		ClusterManager: cm,
 		UserManager:    user,
 		TokenManager:   tk,
 		RoleManager:    role,
+		AppManager:     app,
 	}
 }

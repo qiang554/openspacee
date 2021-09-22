@@ -18,7 +18,7 @@ window.jsyaml = require('js-yaml') // 引入js-yaml为codemirror提高语法检�
 export default {
   name: 'YamlEditor',
   // eslint-disable-next-line vue/require-prop-types
-  props: ['value', 'loading', 'updateValue'],
+  props: ['value', 'loading', 'updateValue', 'readOnly'],
   data() {
     return {
       yamlEditor: false,
@@ -38,14 +38,16 @@ export default {
     }
   },
   mounted() {
-    this.yamlEditor = CodeMirror.fromTextArea(this.$refs.textarea, {
+    var ops = {
       lineNumbers: true, // 显示行号
       mode: 'text/x-yaml', // 语法model
       gutters: ['CodeMirror-lint-markers'],  // 语法检查器
       theme: 'base16-light', // 编辑器主题
       lint: true, // 开启语法检查
       lineWrapping: true,
-    })
+    }
+    if(this.readOnly) ops['readOnly'] = true;
+    this.yamlEditor = CodeMirror.fromTextArea(this.$refs.textarea, ops)
 
     this.yamlEditor.setValue(this.value)
     this.yamlEditor.on('change', (cm) => {

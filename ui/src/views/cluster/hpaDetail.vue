@@ -2,89 +2,96 @@
   <div>
     <clusterbar :titleName="titleName" :editFunc="getHpaYaml" :delFunc="deleteHpa" />
     <div class="dashboard-container">
-      <el-form label-position="left" class="pod-item" label-width="180px" v-if="hpa.metadata">
-        <el-form-item label="名称">
-          <span>{{ hpa.metadata.name }}</span>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <span>{{ hpa.metadata.creationTimestamp }}</span>
-        </el-form-item>
-        <el-form-item label="Namespace">
-          <span>{{ hpa.metadata.namespace }}</span>
-        </el-form-item>
-        <el-form-item label="Min Pods">
-          <span v-if="hpa.spec">{{ hpa.spec.minReplicas }}</span>
-        </el-form-item>
-        <el-form-item label="Max Pods">
-          <span v-if="hpa.spec">{{ hpa.spec.maxReplicas }}</span>
-        </el-form-item>
-        <el-form-item label="Replicas">
-          <span v-if="hpa.status">{{ hpa.status.currentReplicas }}</span>
-        </el-form-item>
-        <el-form-item label="Reference">
-          <span v-if="hpa.spec">{{ hpa.spec.scaleTargetRef.kind }}/{{hpa.spec.scaleTargetRef.name}}</span>
-        </el-form-item>
-      </el-form>
+      <div style="padding: 10px 8px 0px;">
+        <div>基本信息</div>
+        <el-form label-position="left" class="pod-item" label-width="180px" v-if="hpa.metadata" style="margin: 15px 10px 20px 10px;">
+          <el-form-item label="名称">
+            <span>{{ hpa.metadata.name }}</span>
+          </el-form-item>
+          <el-form-item label="创建时间">
+            <span>{{ hpa.metadata.creationTimestamp }}</span>
+          </el-form-item>
+          <el-form-item label="Namespace">
+            <span>{{ hpa.metadata.namespace }}</span>
+          </el-form-item>
+          <el-form-item label="Min Pods">
+            <span v-if="hpa.spec">{{ hpa.spec.minReplicas }}</span>
+          </el-form-item>
+          <el-form-item label="Max Pods">
+            <span v-if="hpa.spec">{{ hpa.spec.maxReplicas }}</span>
+          </el-form-item>
+          <el-form-item label="Replicas">
+            <span v-if="hpa.status">{{ hpa.status.currentReplicas }}</span>
+          </el-form-item>
+          <el-form-item label="Reference">
+            <span v-if="hpa.spec">{{ hpa.spec.scaleTargetRef.kind }}/{{hpa.spec.scaleTargetRef.name}}</span>
+          </el-form-item>
+        </el-form>
+      </div>
 
-          <div class="msgClass">
-            <el-table
-              v-if="hpaEvents && hpaEvents.length > 0"
-              :data="hpaEvents"
-              class="table-fix"
-              tooltip-effect="dark"
-              style="width: 100%"
-              v-loading="eventLoading"
-              :cell-style="cellStyle"
-              :default-sort = "{prop: 'event_time', order: 'descending'}"
-              >
-              <el-table-column
-                prop="type"
-                label="类型"
-                min-width="25"
-                show-overflow-tooltip>
-              </el-table-column>
-              <el-table-column
-                prop="object"
-                label="对象"
-                min-width="55"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.object.kind }}/{{ scope.row.object.name }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="reason"
-                label="原因"
-                min-width="50"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.reason ? scope.row.reason : "——" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="message"
-                label="信息"
-                min-width="120"
-                show-overflow-tooltip>
-                <template slot-scope="scope">
-                  <span>
-                    {{ scope.row.message ? scope.row.message : "——" }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="触发时间"
-                min-width="50"
-                show-overflow-tooltip>
-              </el-table-column>
-            </el-table>
-            <div v-else style="color: #909399; text-align: center">暂无数据</div>
-          </div>
+
+      <div style="padding: 10px 8px 0px;">
+        <div>事件</div>
+        <div class="msgClass" style="margin-top: 15px;">
+          <el-table
+            v-if="hpaEvents && hpaEvents.length > 0"
+            :data="hpaEvents"
+            class="table-fix"
+            tooltip-effect="dark"
+            style="width: 100%"
+            v-loading="eventLoading"
+            :cell-style="cellStyle"
+            :default-sort = "{prop: 'event_time', order: 'descending'}"
+            >
+            <el-table-column
+              prop="type"
+              label="类型"
+              min-width="25"
+              show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+              prop="object"
+              label="对象"
+              min-width="55"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>
+                  {{ scope.row.object.kind }}/{{ scope.row.object.name }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="reason"
+              label="原因"
+              min-width="50"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>
+                  {{ scope.row.reason ? scope.row.reason : "——" }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="message"
+              label="信息"
+              min-width="120"
+              show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>
+                  {{ scope.row.message ? scope.row.message : "——" }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="event_time"
+              label="触发时间"
+              min-width="50"
+              show-overflow-tooltip>
+            </el-table-column>
+          </el-table>
+          <div v-else style="color: #909399; text-align: center">暂无数据</div>
+        </div>
+      </div>
 
       <el-dialog title="编辑" :visible.sync="yamlDialog" :close-on-click-modal="false" width="60%" top="55px">
         <yaml v-if="yamlDialog" v-model="yamlValue" :loading="yamlLoading"></yaml>
@@ -278,6 +285,11 @@ export default {
 .name-class:hover {
   color: #409eff;
 }
+
+.msgClass {
+  margin: 8px 10px 15px 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
 </style>
 
 <style>
@@ -335,9 +347,9 @@ export default {
 .el-dialog__body {
   padding-top: 5px;
 }
-.msgClass {
+/* .msgClass {
   margin: 0px 25px;
-}
+} */
 .msgClass .el-table::before {
   height: 0px;
 }

@@ -74,7 +74,7 @@ func (k *KubeResource) CloseLog(cluster string, params interface{}) *utils.Respo
 }
 
 func (k *KubeResource) request(cluster, action string, params interface{}) *utils.Response {
-	middleRequest := NewMiddleRequest(cluster, k.ResType, action, params, 10)
+	middleRequest := NewMiddleRequest(cluster, k.ResType, action, params, 120)
 	res := k.KubeMessage.SendRequest(middleRequest)
 	return res
 }
@@ -120,6 +120,7 @@ const (
 	PvcType            = "persistentVolumeClaim"
 	PVType             = "persistentVolume"
 	StorageClassType   = "storageClass"
+	Helm               = "helm"
 )
 
 type KubeResources struct {
@@ -147,6 +148,7 @@ type KubeResources struct {
 	Pvc            *KubeResource
 	PV             *KubeResource
 	StorageClass   *KubeResource
+	Helm           *KubeResource
 }
 
 func NewKubeResources(message *MiddleMessage) *KubeResources {
@@ -175,5 +177,6 @@ func NewKubeResources(message *MiddleMessage) *KubeResources {
 		Pvc:            &KubeResource{ResType: PvcType, KubeMessage: message},
 		PV:             &KubeResource{ResType: PVType, KubeMessage: message},
 		StorageClass:   &KubeResource{ResType: StorageClassType, KubeMessage: message},
+		Helm:           &KubeResource{ResType: Helm, KubeMessage: message},
 	}
 }
