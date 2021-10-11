@@ -223,6 +223,8 @@ export default {
   },
   data() {
     return {
+      logContainerShow: false,
+      termContainerShow: false,
       yamlDialog: false,
       yamlValue: "",
       yamlLoading: true,
@@ -315,7 +317,6 @@ export default {
               }
             }
           }
-          console.log(pod_names)
           if(pod_names.length > 0) {
             listPods(cluster, null, pod_names).then(response => {
               this.loading = false

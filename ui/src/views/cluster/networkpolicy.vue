@@ -273,7 +273,7 @@ export default {
         Message.error("获取NetworkPolicy参数异常，请刷新重试")
         return
       }
-      console.log(this.yamlValue)
+      // console.log(this.yamlValue)
       updateNetworkPolicy(cluster, this.yamlNamespace, this.yamlName, this.yamlValue).then(() => {
         Message.success("更新成功")
       }).catch(() => {

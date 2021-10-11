@@ -13,7 +13,7 @@
                 <div class="img-wrapper">
                   <el-image :src="apps[index(row, col)].icon">
                     <div slot="error" class="image-slot">
-                      <i class="el-icon-picture-outline"></i>
+                      <span style="font-size: 32px; padding-left: 15px;">{{ apps[index(row, col)].name[0].toUpperCase() }}</span>
                     </div>
                   </el-image>
                 </div>

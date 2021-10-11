@@ -5,7 +5,7 @@
       <!-- <div class="dashboard-text"></div> -->
       <div style="padding: 10px 8px 0px;">
         <div>基本信息</div>
-        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 30px 10px;">
+        <el-form label-position="left" class="pod-item" label-width="120px" style="margin: 15px 10px 20px 10px;">
           <el-form-item label="名称">
             <span>{{ appDetail.name }}</span>
           </el-form-item>
@@ -26,7 +26,7 @@
 
       <div style="padding: 0px 8px 0px;" v-if="appResources['Ingress']">
         <div>Ingress</div>
-        <div class="msgClass" style="margin: 15px 10px 30px 10px;">
+        <div class="msgClass" style="margin: 15px 10px 20px 10px;">
             <el-table
               ref="table"
               :data="appResources['Ingress']"

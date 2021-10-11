@@ -121,6 +121,7 @@ const (
 	PVType             = "persistentVolume"
 	StorageClassType   = "storageClass"
 	Helm               = "helm"
+	Crd                = "crd"
 )
 
 type KubeResources struct {
@@ -149,6 +150,7 @@ type KubeResources struct {
 	PV             *KubeResource
 	StorageClass   *KubeResource
 	Helm           *KubeResource
+	Crd            *KubeResource
 }
 
 func NewKubeResources(message *MiddleMessage) *KubeResources {
@@ -178,5 +180,6 @@ func NewKubeResources(message *MiddleMessage) *KubeResources {
 		PV:             &KubeResource{ResType: PVType, KubeMessage: message},
 		StorageClass:   &KubeResource{ResType: StorageClassType, KubeMessage: message},
 		Helm:           &KubeResource{ResType: Helm, KubeMessage: message},
+		Crd:            &KubeResource{ResType: Crd, KubeMessage: message},
 	}
 }

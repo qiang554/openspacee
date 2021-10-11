@@ -37,6 +37,7 @@ func NewViewSets(kr *kube_resource.KubeResources, models *model.Models) *ViewSet
 	pv := kube_views.NewPV(kr)
 	storageclass := kube_views.NewStorageClass(kr)
 	helm := kube_views.NewHelm(kr, models)
+	crd := kube_views.NewCrd(kr)
 
 	viewsets := &ViewSets{
 		"cluster":        cluster.Views,
@@ -65,6 +66,7 @@ func NewViewSets(kr *kube_resource.KubeResources, models *model.Models) *ViewSet
 		"pv":             pv.Views,
 		"storageclass":   storageclass.Views,
 		"helm":           helm.Views,
+		"crd":            crd.Views,
 	}
 
 	return viewsets

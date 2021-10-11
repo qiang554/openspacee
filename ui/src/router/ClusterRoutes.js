@@ -364,6 +364,12 @@ const Routes = [
       },
     ]
   },
+  {
+    path: 'crd',
+    name: 'crd',
+    component: () => import('@/views/cluster/crd'),
+    meta: { title: 'CRD', icon: 'crd', group: 'cluster', object: 'crd' },
+  },
 ]
 
 const clusterRoutes = [
