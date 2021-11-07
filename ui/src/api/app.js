@@ -32,7 +32,7 @@ export function getApp(name, chart_version) {
 
 export function createApp(cluster, data) {
   return request({
-    url: `helm//release/${cluster}`,
+    url: `helm/release/${cluster}`,
     method: 'post',
     data
   })
